@@ -18,6 +18,7 @@ never surfaced as remediation output.
 from __future__ import annotations
 
 import logging
+import os
 import re
 from typing import Any
 
@@ -100,7 +101,17 @@ class NISTRetriever:
     def __init__(self, chunks: list[dict], persist_dir: str | None = None):
         self.chunks = chunks
         self._bm25 = BM25Okapi([_tokenize(c["search_text"]) for c in chunks])
-        self._dense = self._try_init_dense(persist_dir) if persist_dir else None
+        # DISABLE_DENSE_RETRIEVAL: an explicit opt-out for memory-constrained
+        # hosts (e.g. Render's free tier) -- torch + sentence-transformers +
+        # chromadb have a real baseline memory cost even CPU-only, and this
+        # skips importing any of them at all rather than importing them and
+        # hoping they fit. Same BM25-only mode the retriever already falls
+        # back to automatically on any load failure -- this just chooses it
+        # deliberately instead of discovering the hard way.
+        skip_dense = os.getenv("DISABLE_DENSE_RETRIEVAL", "").strip().lower() in (
+            "1", "true", "yes")
+        self._dense = (self._try_init_dense(persist_dir)
+                       if persist_dir and not skip_dense else None)
         self.mode = "hybrid (BM25 + dense, RRF-fused)" if self._dense else "BM25-only (lexical)"
         log.info("NISTRetriever ready: %d controls, mode=%s", len(chunks), self.mode)
 

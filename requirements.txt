@@ -5,6 +5,16 @@ rank_bm25>=0.2.2
 langchain_text_splitters>=0.3
 langgraph>=0.2
 chromadb>=0.5
+
+# CPU-only torch, explicitly. sentence-transformers pulls in torch
+# transitively, and without this, pip resolves the default PyPI build on
+# Linux -- which is CUDA-enabled and drags in the full nvidia-cuda-*/
+# nvidia-cublas/nvidia-cudnn/etc. stack (gigabytes, on a host with no GPU
+# at all -- confirmed: this is exactly what blew through Render's memory
+# limit). The CPU wheel is a small fraction of the size and footprint.
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch>=2.0
+
 sentence-transformers>=3.0
 streamlit>=1.36
 
