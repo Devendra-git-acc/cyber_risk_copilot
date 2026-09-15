@@ -44,6 +44,24 @@ _CVE_TOKEN = re.compile(r"CVE-[A-Z0-9]+-\d{4}-\d{4,}|CVE-\d{4}-\d{4,}")
 _CVSS_MENTION = re.compile(r"CVSS(?:\s+score)?(?:\s+of)?\s*[:\-]?\s*(\d+(?:\.\d+)?)", re.IGNORECASE)
 _RISKSCORE_MENTION = re.compile(r"risk\s*score(?:\s+of)?\s*[:\-]?\s*(\d+(?:\.\d+)?)", re.IGNORECASE)
 
+# Some models (confirmed: Groq's openai/gpt-oss-120b) consistently write
+# "typographically correct" Unicode hyphens/dashes in compound terms AND
+# inside control/CVE IDs themselves (e.g. "SC‑23.1" with U+2011, not "SC-23.1"
+# with ASCII U+002D). All the regexes above require a literal ASCII hyphen,
+# so a citation that's substantively correct was being read as ZERO
+# citations -- verify() rejected valid drafts every time, burning the
+# regeneration budget and falling back to the template unnecessarily.
+# Normalizing before matching (not before display -- the shipped narrative
+# keeps whatever the model wrote) fixes this for any model with the same
+# habit, not just this one.
+_HYPHEN_VARIANTS = str.maketrans({
+    "‐": "-",  # HYPHEN
+    "‑": "-",  # NON-BREAKING HYPHEN
+    "‒": "-",  # FIGURE DASH
+    "–": "-",  # EN DASH
+    "−": "-",  # MINUS SIGN
+})
+
 
 class AgentState(TypedDict, total=False):
     risk: dict
@@ -199,7 +217,19 @@ def build_agent(retriever, hints_df, llm: LLMClient | None,
                         f"{risk['threat_context']['ti_actors'] or 'KEV-listed'}; "
                         f"ransomware={risk['threat_context']['ransomware_linked']}\n"
                         f"CANDIDATE CONTROLS:\n{controls_txt}")
-                raw = llm.chat(GRADE_SYSTEM, user, max_tokens=300)
+                # 800, not 300: reasoning-style models (e.g. Groq's
+                # openai/gpt-oss-120b) spend a real, variable chunk of the
+                # budget on hidden reasoning before the visible JSON answer
+                # -- confirmed empirically (429 reasoning tokens observed on
+                # this exact prompt shape, leaving nothing for the actual
+                # ~50-token answer at max_tokens=300, which silently
+                # degrades every grade call to the heuristic fallback).
+                # generate()'s existing 900-token default survives the same
+                # overhead, hence a comparable budget here instead of a
+                # provider-specific reasoning_effort param, which risks
+                # breaking a plain OpenAI-compatible call that rejects
+                # unrecognized fields.
+                raw = llm.chat(GRADE_SYSTEM, user, max_tokens=800)
                 parsed = json.loads(re.sub(r"```(json)?", "", raw).strip())
                 ids = set(parsed.get("applicable_ids", []))
                 applicable = [c for c in retrieved if c["control_id"] in ids]
@@ -269,11 +299,16 @@ def build_agent(retriever, hints_df, llm: LLMClient | None,
 
     def node_verify(state: AgentState) -> AgentState:
         draft, risk = state["draft"], state["risk"]
+        # Match against a hyphen-normalized copy only -- the shipped
+        # narrative_md keeps whatever the model actually wrote (Unicode
+        # hyphens render fine in markdown/HTML; this is purely about not
+        # missing a citation the regexes would otherwise fail to see).
+        matchable = draft.translate(_HYPHEN_VARIANTS)
         allowed_controls = {c["control_id"] for c in state["applicable"]}
-        cited = set(_CITATION.findall(draft))
+        cited = set(_CITATION.findall(matchable))
         allowed_cves = {risk["cve"]} | {
             r["cve"] for r in risk.get("related_findings_same_asset", [])}
-        cves_in_draft = set(_CVE_TOKEN.findall(draft))
+        cves_in_draft = set(_CVE_TOKEN.findall(matchable))
 
         issues = []
         if not cited:
@@ -285,12 +320,12 @@ def build_agent(retriever, hints_df, llm: LLMClient | None,
 
         # Numeric ground truth: a cited CVSS/risk-score figure must match this
         # finding's actual numbers, not just "some number the LLM felt like."
-        bad_cvss = {float(x) for x in _CVSS_MENTION.findall(draft)
+        bad_cvss = {float(x) for x in _CVSS_MENTION.findall(matchable)
                    if abs(float(x) - float(risk["cvss"])) > _NUMBER_TOLERANCE}
         if bad_cvss:
             issues.append(f"cites a CVSS value ({sorted(bad_cvss)}) that doesn't "
                           f"match this finding's actual CVSS ({risk['cvss']})")
-        bad_score = {float(x) for x in _RISKSCORE_MENTION.findall(draft)
+        bad_score = {float(x) for x in _RISKSCORE_MENTION.findall(matchable)
                     if abs(float(x) - float(risk["risk_score"])) > _NUMBER_TOLERANCE}
         if bad_score:
             issues.append(f"cites a risk score ({sorted(bad_score)}) that doesn't "
@@ -304,7 +339,7 @@ def build_agent(retriever, hints_df, llm: LLMClient | None,
             this_risk_actors = {a.strip() for a in
                                 str(risk["threat_context"].get("ti_actors", "")).split(",")
                                 if a.strip()}
-            mentioned = {a for a in known_actors if a and a in draft}
+            mentioned = {a for a in known_actors if a and a in matchable}
             foreign_actors = mentioned - this_risk_actors
             if foreign_actors:
                 issues.append(f"mentions threat actor(s) not associated with this "
@@ -362,7 +397,8 @@ def build_agent(retriever, hints_df, llm: LLMClient | None,
             "assets": [a["asset_name"] for a in risk["affected_assets"]],
             "business_service": risk["business_service"]["name"],
             "narrative_md": state["draft"],
-            "cited_controls": sorted(set(_CITATION.findall(state["draft"]))),
+            "cited_controls": sorted(set(
+                _CITATION.findall(state["draft"].translate(_HYPHEN_VARIANTS)))),
             "retrieved_controls": [
                 {"control_id": c["control_id"], "title": c["title"],
                  "family": c["family"], "statement": c["statement"],

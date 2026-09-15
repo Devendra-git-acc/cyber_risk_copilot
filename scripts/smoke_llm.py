@@ -9,6 +9,13 @@ agent with LLM-grounded generation, (3) verify passes on the live output.
 import sys
 from pathlib import Path
 
+# Some models (e.g. Groq's openai/gpt-oss-*) favor Unicode punctuation
+# (non-breaking hyphens, smart quotes) that Windows' default terminal
+# encoding (cp1252) can't print -- crashes this script's own output, not
+# the app itself (a browser renders UTF-8 fine). Harmless everywhere else.
+if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
+    sys.stdout.reconfigure(encoding="utf-8")
+
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
@@ -29,7 +36,12 @@ def main() -> None:
     if not llm.configured:
         sys.exit("No API key found. Set OPENAI_API_KEY or LLM_API_KEY.")
     print(f"endpoint: {llm.base_url}  model: {llm.model}")
-    pong = llm.chat("Reply with exactly: OK", "ping", max_tokens=5)
+    # max_tokens=60, not 5: reasoning-style models (e.g. Groq's openai/gpt-oss-*)
+    # spend a variable, prompt-dependent amount of the budget on hidden
+    # reasoning before any visible output, so a small budget can come back
+    # empty on a model that's actually working fine -- confirmed empirically
+    # (5 and even 30 both came back blank on this exact model/prompt shape).
+    pong = llm.chat("Reply with exactly: OK", "ping", max_tokens=60)
     print(f"connectivity: {pong.strip()[:20]}")
 
     ds = load_datasets(ROOT / "data" / "raw")

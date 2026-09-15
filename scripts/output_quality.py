@@ -26,7 +26,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from risk_engine.agent import build_agent, narrate_risk
+from risk_engine.agent import _HYPHEN_VARIANTS, build_agent, narrate_risk
 from risk_engine.enrich import build_master_table
 from risk_engine.kev import fetch_kev, kev_index
 from risk_engine.llm import LLMClient
@@ -47,7 +47,13 @@ def _known_actors(ds) -> set[str]:
 
 
 def check_card(card: dict, risk: dict, all_actors: set[str]) -> dict:
-    text = card["narrative_md"]
+    # Normalized once, up front: some models (confirmed: Groq's
+    # openai/gpt-oss-120b) write "typographically correct" Unicode hyphens
+    # inside control-ID citations themselves (e.g. "SC‑23.1" with U+2011),
+    # which _CITATION's ASCII-hyphen pattern can't see -- every bullet from
+    # such a model was misreported as uncited. See agent.py's identical fix
+    # and _HYPHEN_VARIANTS docstring for the full story.
+    text = card["narrative_md"].translate(_HYPHEN_VARIANTS)
     issues: list[str] = []
 
     # ---- format compliance ------------------------------------------------

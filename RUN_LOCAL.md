@@ -55,7 +55,8 @@ Notes
   template (generation_mode: template_fallback).
 - Free-tier alternative to OpenAI (assignment-compliant):
   export LLM_BASE_URL=https://api.groq.com/openai/v1
-  export LLM_MODEL=llama-3.3-70b-versatile
+  export LLM_MODEL=openai/gpt-oss-120b   # check console.groq.com/docs/models -- Groq's
+                                          # lineup changes over time, confirm before assuming
   export LLM_API_KEY=gsk_...
 - Tracing (optional, off by default): set these to see every agent step
   (build_query -> retrieve -> grade -> generate -> verify) plus the raw LLM

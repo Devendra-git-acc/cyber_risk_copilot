@@ -96,22 +96,31 @@ def main() -> None:
 
     # Judge model deliberately independent of the generator: a model grading
     # its own output is weak evidence (it's biased toward finding its own
-    # claims acceptable). DEEPEVAL_JUDGE_MODEL lets you point the judge at a
-    # different/stronger model on the same OpenAI-compatible endpoint (same
-    # api_key/base_url as LLMClient -- just a different model string), e.g.
-    # generate with gpt-4o-mini, judge with gpt-4o. Falls back to the
-    # generator's own model only if you haven't set one, with a loud warning
-    # since that's the weaker, self-judging setup.
+    # claims acceptable). Independent by default means independent CREDENTIALS
+    # too, not just a different model string -- DEEPEVAL_JUDGE_API_KEY (or
+    # plain OPENAI_API_KEY, since OpenAI is the natural strong-and-separate
+    # choice) against OpenAI's real endpoint, NOT llm.api_key/llm.base_url.
+    # Reusing the generator's credentials silently broke the day the
+    # generator moved to Groq while DEEPEVAL_JUDGE_MODEL stayed an OpenAI
+    # model name (confirmed: exactly this happened -- Groq has no model
+    # called "gpt-4o", so the judge call 404'd).
     judge_model = os.getenv("DEEPEVAL_JUDGE_MODEL") or llm.model
-    if judge_model == llm.model:
-        print(f"WARNING: DEEPEVAL_JUDGE_MODEL not set -- judging with the same "
-              f"model that generated the cards ({llm.model}). This is weaker "
-              f"evidence (self-judging bias). Set DEEPEVAL_JUDGE_MODEL to a "
-              f"different/stronger model for a real independent check.\n")
-    judge = OpenAIModel(model=judge_model, api_key=llm.api_key, base_url=llm.base_url)
+    judge_api_key = os.getenv("DEEPEVAL_JUDGE_API_KEY") or os.getenv("OPENAI_API_KEY")
+    judge_base_url = os.getenv("DEEPEVAL_JUDGE_BASE_URL") or "https://api.openai.com/v1"
+    if not judge_api_key:
+        judge_api_key, judge_base_url = llm.api_key, llm.base_url
+        print(f"WARNING: no DEEPEVAL_JUDGE_API_KEY/OPENAI_API_KEY set -- falling "
+              f"back to the generator's own endpoint ({llm.base_url}) for "
+              f"judging. Make sure '{judge_model}' actually exists there.\n")
+    elif judge_model == llm.model and judge_base_url == llm.base_url:
+        print(f"WARNING: DEEPEVAL_JUDGE_MODEL not set to something different "
+              f"from the generator ({llm.model}) -- self-judging bias, weaker "
+              f"evidence.\n")
+    judge = OpenAIModel(model=judge_model, api_key=judge_api_key, base_url=judge_base_url)
     metric = FaithfulnessMetric(threshold=FAITHFULNESS_THRESHOLD, model=judge)
 
-    print(f"DeepEval faithfulness evaluation (generator={llm.model}, judge={judge_model})\n")
+    print(f"DeepEval faithfulness evaluation "
+          f"(generator={llm.model}@{llm.base_url}, judge={judge_model}@{judge_base_url})\n")
     scores: list[float] = []
     for risk in top5:
         card = narrate_risk(agent, risk)
