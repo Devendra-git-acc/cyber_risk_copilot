@@ -23,6 +23,12 @@ import re
 import sys
 from pathlib import Path
 
+# Some models favor Unicode punctuation (non-breaking hyphens, smart quotes)
+# that Windows' default terminal encoding (cp1252) can't print. See
+# scripts/smoke_llm.py for the same fix.
+if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
+    sys.stdout.reconfigure(encoding="utf-8")
+
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 

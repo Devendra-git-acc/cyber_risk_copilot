@@ -2,82 +2,84 @@
 _Scoring: deterministic likelihood x impact. Remediation: retrieved from NIST SP 800-53 Rev 5. Narration mode varies per card (see tag)._
 
 ---
-## #1 — Payment API Insecure Direct Object Reference (CVE-SYN-2026-0010)  `score 100.0`
-**Assets:** payment-api-prod-01 | **Service:** Payment Processing | **Mode:** `llm_grounded`
-
-**Why this ranks here** — The Payment API Insecure Direct Object Reference vulnerability (CVE-SYN-2026-0010) poses a critical risk to TawasolPay's payment processing service, which is customer-facing and essential for revenue generation. With active exploitation by the IronVeil threat actor, who targets financial services to escalate access post-session hijack, the potential for payment failures and PCI DSS compliance breaches is significant, leading to severe business impact and reputational damage.
-
-**Recommended actions (NIST SP 800-53)** — 
-- Implement access enforcement mechanisms to ensure only authorized users can access sensitive payment API resources [AC-3].
-- Enforce information flow controls to restrict unauthorized external traffic and protect sensitive data within the payment processing system [AC-4].
-- Verify the integrity of identity assertions and access tokens used in the payment API to prevent unauthorized access [IA-13.2].
-- Conduct a thorough review of the payment API's security posture and apply the available patch for CVE-SYN-2026-0010 immediately.
-
-**Urgency** — A patch is available, but the vulnerability has been open for 11 days, necessitating immediate action to mitigate risk.
-
-_Retrieved controls: AC-3, AC-4, IA-13.2_
-
----
-## #2 — Citrix ADC Session Token Leak (CitrixBleed) (CVE-2023-4966)  `score 98.8`
+## #1 — Citrix ADC Session Token Leak (CitrixBleed) (CVE-2023-4966)  `score 77.1`
 **Assets:** load-balancer-prod-01, load-balancer-prod-02 | **Service:** Customer Login | **Mode:** `llm_grounded`
 
-**Why this ranks here** — The Citrix ADC Session Token Leak (CVE-2023-4966) poses a critical risk to TawasolPay, as it allows attackers to harvest session tokens, enabling them to bypass multi-factor authentication (MFA) and access customer-facing services. This vulnerability is actively exploited by the IronVeil group, which targets financial services, leading to potential service disruptions and significant revenue loss due to blocked customer transactions. The exposure of the load balancer to the internet further amplifies the risk, especially given the critical nature of the Customer Login service and its compliance implications under GDPR.
+**Why this ranks here** – The internet‑exposed Citrix NetScaler ADC (load‑balancer‑prod‑01) protects the critical “Customer Login” service (GDPR‑scope, revenue‑critical). An active IronVeil campaign is exploiting CVE‑2023‑4966 to harvest session tokens, bypass MFA and sell them to ransomware affiliates, meaning a breach would halt all customer‑facing transactions and trigger severe compliance and revenue loss. Exploit and patch are both publicly available, yet the vulnerability has remained un‑remediated for 180 days, amplifying exposure.
 
-**Recommended actions (NIST SP 800-53)** — 
-- Apply mitigations and kill all active and persistent sessions as per vendor instructions [SC-23.1].
-- Generate unique session identifiers for each session to prevent reuse of valid session IDs [SC-23.3].
-- Implement automatic session termination after a defined period of inactivity to reduce the window of opportunity for exploitation [AC-12].
-- Ensure that all session identifiers are invalidated upon user logout to enhance session security [SC-23.1].
-- Review and enhance monitoring for unusual session activity to detect potential exploitation attempts.
+**Recommended actions (NIST SP 800‑53)**  
+- Apply the vendor‑provided mitigations and terminate all active/persistent sessions immediately, or decommission the NetScaler product if mitigations cannot be applied (per KEV guidance).  
+- Invalidate session identifiers at logout or any session termination to prevent reuse of harvested tokens [SC-23.1].  
+- Enforce generation of unique, system‑generated session identifiers for every session to block replay of captured IDs [SC-23.3].  
+- Strengthen session authenticity controls to ensure cryptographic validation of session traffic end‑to‑end [SC-23].  
 
-**Urgency** — A patch is available, but the vulnerability has been open for 180 days, necessitating immediate action.
+**Urgency** – Patch and mitigations are available, but the flaw has been open for 180 days with active exploitation; immediate remediation is required.
 
-_Retrieved controls: SC-23.1, SC-23.3, SC-23, AC-12_
+_Retrieved controls: SC-23.1, SC-23.3, SC-23_
 
 ---
-## #3 — Remote Code Execution in Web Framework (CVE-SYN-2026-0001)  `score 97.4`
+## #2 — Payment API Insecure Direct Object Reference (CVE-SYN-2026-0010)  `score 67.5`
+**Assets:** payment-api-prod-01 | **Service:** Payment Processing | **Mode:** `llm_grounded`
+
+**Why this ranks here** – The production payment API is internet‑exposed and suffers an Insecure Direct Object Reference (IDOR) that requires no authentication, giving IronVeil a direct path to bypass controls and harvest session tokens. An exploit is publicly available, a patch exists, and the group is actively exploiting related CitrixBleed chains, with ransomware affiliates already linked to the threat. Failure of this service would halt payments, trigger a PCI‑DSS breach, and impact critical revenue, while the RTO is only 1 hour, amplifying business risk.
+
+**Recommended actions (NIST SP 800‑53)**  
+- Enforce strict authorization checks on all API endpoints to ensure only permitted subjects can access payment objects [AC-3].  
+- Apply a mandatory access control policy that prevents subjects from accessing or forwarding payment records without explicit rights [AC-3.3].  
+- Deploy a tamper‑proof reference monitor to validate every request to the payment handler and log violations for rapid detection [AC-25].  
+- Install the vendor‑released patch for the Node.js/Ubuntu stack immediately and verify remediation through automated testing.  
+- Conduct a focused code review of the payment handler to eliminate IDOR patterns and integrate token‑validation mechanisms.
+
+**Urgency** – A patch is available and the finding has been open for 11 days; immediate remediation is required.
+
+_Retrieved controls: AC-3, AC-3.3, AC-25_
+
+---
+## #3 — Fortinet SSL-VPN Heap Buffer Overflow RCE (CVE-2024-21762)  `score 63.3`
+**Assets:** vpn-edge-02, vpn-edge-01, vpn-staging | **Service:** Remote Access | **Mode:** `llm_grounded`
+
+**Why this ranks here** – The internet‑exposed FortiGate VPN (CVE‑2024‑21762) carries a CVSS 9.8 score, an active exploit in the KEV list, and a weaponized CrimsonJackal campaign that has already hit a Dubai fintech firm, leading to ransomware within 4‑6 days. With remote‑access services critical to revenue and ISO 27001 compliance, any compromise would block administrators and employees, causing severe operational and financial loss.
+
+**Recommended actions (NIST SP 800‑53)**  
+- Apply the vendor‑provided mitigations or retire the vulnerable firmware immediately, as mandated by the KEV advisory [SI-2].  
+- Test the released patch in a controlled environment and install it on all production FortiGate devices within the organization‑defined timeframe [SI-2].  
+- Deploy an automated patch‑management solution to ensure timely distribution of the FortiGate update across the VPN fleet [SI-2.4].  
+- Update the configuration‑management database to record the flaw, remediation status, and any decommission decisions [SI-2].  
+- Verify that endpoint detection and response (EDR) is enabled on VPN appliances to improve post‑exploitation visibility [SI-2].
+
+**Urgency** – A patch has been available for 27 days; given the high‑severity exploit and active ransomware targeting, immediate remediation is required.
+
+_Retrieved controls: SI-2, SI-2.4_
+
+---
+## #4 — Remote Code Execution in Web Framework (CVE-SYN-2026-0001)  `score 61.8`
 **Assets:** auth-gateway-prod-01 | **Service:** Customer Login | **Mode:** `llm_grounded`
 
-**Why this ranks here** — This risk is critical due to the potential for remote code execution on an internet-exposed web server, impacting the Customer Login service. Exploitation could lead to complete service disruption, blocking all customer-facing transactions and severely affecting revenue and compliance with GDPR. The vulnerability (CVE-SYN-2026-0001) has been weaponized and is actively targeted by the ShadowMint actor in the "Portal Crush" campaign, increasing the urgency for remediation.
+**Why this ranks here** – The production auth‑gateway is internet‑exposed and runs a vulnerable web framework (CVE‑SYN‑2026‑0001) with a CVSS 9.8 score. An exploit is publicly available and the ShadowMint “Portal Crush” campaign has already attempted exploitation against UAE portals, giving a high likelihood of successful RCE. Successful compromise would block the Customer Login service, a critical, GDPR‑scoped, customer‑facing function, halting all transactions and breaching compliance.  
 
-**Recommended actions (NIST SP 800-53)** — 
-- Implement a comprehensive vulnerability scanning program to continuously monitor for vulnerabilities in the web framework and related components [RA-5].
-- Prioritize and install the available patch for CVE-SYN-2026-0001 to remediate the identified flaw promptly [SI-2].
-- Conduct regular security assessments and interactive application security testing to identify and address potential vulnerabilities in the web application [SA-11.9].
-- Ensure that all internet-facing assets are included in the vulnerability management process to mitigate exposure risks [RA-5].
+**Recommended actions (NIST SP 800‑53)**  
+- Deploy the vendor‑supplied fix immediately and verify its effectiveness before production rollout [SI-2].  
+- Verify that the patch is installed on all maintenance tools and related components to prevent a secondary vector [MA-3.6].  
+- Conduct a full vulnerability scan of the web server and any dependent services to confirm no other exploitable flaws remain [RA-5].  
+- Run interactive application security testing on the web framework to detect any residual or related weaknesses before and after patching [SA-11.9].  
 
-**Urgency** — The patch is available, but the vulnerability has been open for 18 days, necessitating immediate action.
+**Urgency** – A patch exists but the finding has been open for 18 days; rapid remediation is required.
 
-_Retrieved controls: RA-5, SI-2, SA-11.9_
+_Retrieved controls: SI-2, RA-5, MA-3.6, SA-11.9_
 
 ---
-## #4 — Kong Gateway Admin API Exposed (CVE-SYN-2026-0011)  `score 91.7`
+## #5 — Kong Gateway Admin API Exposed (CVE-SYN-2026-0011)  `score 59.5`
 **Assets:** partner-api-gateway-prod | **Service:** Partner API Gateway | **Mode:** `llm_grounded`
 
-**Why this ranks here** — The exposure of the Kong Gateway Admin API presents a critical risk, as it allows the WinterViper group to gain full control over proxied routes, leading to potential financial fraud and data theft. Given the high revenue impact on the Partner API Gateway and the compliance requirements under PCI DSS and ISO 27001, any exploitation could result in significant financial losses and SLA breach penalties, affecting customer trust and business operations.
+**Why this ranks here** – The Kong Gateway admin API is internet‑exposed without authentication, giving an attacker immediate privileged control of the production partner API gateway. WinterViper has a weaponized campaign targeting this exact flaw, and the exploit is publicly available, so successful abuse can reroute payment traffic, inject fraudulent transactions, and cause partner‑integration outages that breach high‑value SLAs and PCI‑DSS compliance — direct financial loss and penalty exposure.
 
-**Recommended actions (NIST SP 800-53)** — 
-- Implement boundary protection mechanisms to monitor and control communications at the API Gateway, ensuring that only authorized traffic is allowed [SC-7].
-- Establish a traffic flow policy for the managed interface of the Partner API Gateway to protect the confidentiality and integrity of transmitted information [SC-7.4].
-- Isolate the API Gateway from other internal systems to limit unauthorized information flows and enhance security for sensitive components [SC-7.21].
-- Regularly review and update the traffic flow policy exceptions to ensure they are justified and necessary for business operations [SC-7.4].
+**Recommended actions (NIST SP 800‑53)**  
+- Deploy a dedicated, managed firewall or reverse‑proxy to isolate the admin interface from the public Internet and enforce strict inbound filtering [SC-7].  
+- Restrict the admin API to privileged accounts only; remove management functions from any non‑privileged user endpoints [SC-2.1].  
+- Route all privileged remote sessions through a hardened jump host with full logging and multi‑factor authentication [SC-7.15].  
+- Apply the vendor‑released patch for CVE‑SYN‑2026‑0011 immediately and verify remediation via vulnerability scanning.  
+- Enable continuous monitoring of the admin interface for anomalous configuration changes and alert on any unauthorized access attempts.
 
-**Urgency** — A patch is available, and the vulnerability has been open for 5 days, necessitating immediate action to mitigate risk.
+**Urgency** – A patch exists, the vulnerability has been exploitable for 5 days, and the CVSS 9.3 score indicates a critical, time‑sensitive risk.
 
-_Retrieved controls: SC-7, SC-7.18, SC-7.4, SC-7.21, SC-7.15_
-
----
-## #5 — Fortinet SSL-VPN Heap Buffer Overflow RCE (CVE-2024-21762)  `score 79.8`
-**Assets:** vpn-edge-01, vpn-edge-02, vpn-staging | **Service:** Remote Access | **Mode:** `llm_grounded`
-
-**Why this ranks here** — The vulnerability CVE-2024-21762 in Fortinet's SSL-VPN presents a critical risk due to its high CVSS score of 9.8 and active exploitation by the threat actor CrimsonJackal, who targets financial services in the Gulf region. The potential for remote code execution could lead to significant business impact, including loss of secure network access for remote employees, which directly affects service delivery and compliance with ISO 27001. Given the actor's history of lateral movement and ransomware deployment, the risk of data exfiltration and operational disruption is substantial.
-
-**Recommended actions (NIST SP 800-53)** — 
-- Apply mitigations per vendor instructions for CVE-2024-21762 immediately to secure the VPN gateways [SI-2].
-- Discontinue use of the product if mitigations are unavailable, as per CISA's guidance [SI-2].
-- Review and document remote access configurations to ensure compliance with organizational policies [AC-17].
-- Implement encryption mechanisms for remote access sessions to protect data integrity and confidentiality [AC-17.2].
-
-**Urgency** — The patch has been available for 27 days, and immediate action is required to mitigate this critical vulnerability.
-
-_Retrieved controls: AC-17, SI-2, AC-17.2_
+_Retrieved controls: SC-7, SC-2.1, SC-7.15_

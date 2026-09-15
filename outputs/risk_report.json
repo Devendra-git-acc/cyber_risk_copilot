@@ -10,55 +10,7 @@
   "cards": [
     {
       "rank": 1,
-      "risk_score": 100.0,
-      "cve": "CVE-SYN-2026-0010",
-      "title": "Payment API Insecure Direct Object Reference",
-      "assets": [
-        "payment-api-prod-01"
-      ],
-      "business_service": "Payment Processing",
-      "narrative_md": "**Why this ranks here** \u2014 The Payment API Insecure Direct Object Reference vulnerability (CVE-SYN-2026-0010) poses a critical risk to TawasolPay's payment processing service, which is customer-facing and essential for revenue generation. With active exploitation by the IronVeil threat actor, who targets financial services to escalate access post-session hijack, the potential for payment failures and PCI DSS compliance breaches is significant, leading to severe business impact and reputational damage.\n\n**Recommended actions (NIST SP 800-53)** \u2014 \n- Implement access enforcement mechanisms to ensure only authorized users can access sensitive payment API resources [AC-3].\n- Enforce information flow controls to restrict unauthorized external traffic and protect sensitive data within the payment processing system [AC-4].\n- Verify the integrity of identity assertions and access tokens used in the payment API to prevent unauthorized access [IA-13.2].\n- Conduct a thorough review of the payment API's security posture and apply the available patch for CVE-SYN-2026-0010 immediately.\n\n**Urgency** \u2014 A patch is available, but the vulnerability has been open for 11 days, necessitating immediate action to mitigate risk.",
-      "cited_controls": [
-        "AC-3",
-        "AC-4",
-        "IA-13.2"
-      ],
-      "retrieved_controls": [
-        {
-          "control_id": "AC-3",
-          "title": "Access Enforcement",
-          "family": "Access Control",
-          "statement": "Enforce approved authorizations for logical access to information and system resources in accordance with applicable access control policies.",
-          "guidance": "Access control policies control access between active entities or subjects (i.e., users or processes acting on behalf of users) and passive entities or objects (i.e., devices, files, records, domains) in organizational systems. In addition to enforcing authorized access at the system level and recognizing that systems can host many applications and services in support of mission and business functions, access enforcement mechanisms can also be employed at the application and service level to provide increased information security and privacy. In contrast to logical access controls that are implemented within the system, physical access controls are addressed by the controls in the Physical and Environmental Protection ( [PE](#pe) ) family."
-        },
-        {
-          "control_id": "AC-4",
-          "title": "Information Flow Enforcement",
-          "family": "Access Control",
-          "statement": "Enforce approved authorizations for controlling the flow of information within the system and between connected systems based on [organization-defined value].",
-          "guidance": "Information flow control regulates where information can travel within a system and between systems (in contrast to who is allowed to access the information) and without regard to subsequent accesses to that information. Flow control restrictions include blocking external traffic that claims to be from within the organization, keeping export-controlled information from being transmitted in the clear to the Internet, restricting web requests that are not from the internal web proxy server, and limiting information transfers between organizations based on data structures and content. Transferring information between organizations may require an agreement specifying how the information flow is enforced (see [CA-3](#ca-3) ). Transferring information between systems in different security or privacy domains with different security or privacy policies introduces the risk that such transfers violate one or more domain security or privacy policies. In such situations, information owners/stewards provide guidance at designated policy enforcement points between connected systems. Organizations consider mandating specific architectural solutions to enforce specific security and privacy policies. Enforcement includes prohibiting information transfers between connected systems (i.e., allowing access only), verifying write permissions before accepting information from another security or privacy domain or connected system, employing hardware mechanisms to enforce one-way information flows, and implementing trustworthy regrading mechanisms to reassign security or privacy attributes and labels. Organizations commonly employ information flow control policies and enforcement mechanisms to control the flow of information between designated sources and destinations within systems and between connected systems. Flow control is based on the characteristics of the information and/or the information path. Enforcement occurs, for example, in boundary protection devices that employ rule sets or establish configuration settings that restrict system services, provide a packet-filtering capability based on header information, or provide a message-filtering capability based on message content. Organizations also consider the trustworthiness of filtering and/or inspection mechanisms (i.e., hardware, firmware, and software components) that are critical to information flow enforcement. Control enhancements 3 through 32 primarily address cross-domain solution needs that focus on more advanced filtering techniques, in-depth analysis, and stronger flow enforcement mechanisms implemented in cross-domain products, such as high-assurance guards. Such capabilities are generally not available in commercial off-the-shelf products. Information flow enforcement also applies to control plane traffic (e.g., routing and DNS)."
-        },
-        {
-          "control_id": "IA-13.2",
-          "title": "Verification of Identity Assertions and Access Tokens",
-          "family": "Identification and Authentication",
-          "statement": "The source and integrity of identity assertions and access tokens are verified before granting access to system and information resources.",
-          "guidance": "This includes verification of digital signatures protecting identity assertions and access tokens, as well as included metadata. Metadata includes information about the access request such as information unique to user, system or information resource being accessed, or the transaction itself such as time. Protected system and information resources could include connected networks, applications, and APIs."
-        }
-      ],
-      "retrieval_query": "Payment API Insecure Direct Object Reference Payment Handler API Server enforce approved authorizations logical access enforcement least privilege information input validation flaw remediation security patches software updates incident handling response malicious code remote access boundary protection Patch API gateway immediately; rotate all API keys and tokens; add regression authentication test to CI/CD pipeline; review API logs for unauthorized access || Payment API Insecure Direct Object Reference enforce approved authorizations logical access enforcement least privilege information input validation",
-      "generation_mode": "llm_grounded",
-      "agent_trace": [
-        "build_query: 2 queries (evidence + hint vocabulary, class list and/or LLM expansion)",
-        "retrieve: 6 controls [AC-3, AC-3.3, AC-25, AC-4, IA-13.2, CA-3.6]",
-        "grade(LLM): 3 applicable, sufficient=True",
-        "generate(LLM): draft produced",
-        "verify: PASS"
-      ]
-    },
-    {
-      "rank": 2,
-      "risk_score": 98.8,
+      "risk_score": 77.1,
       "cve": "CVE-2023-4966",
       "title": "Citrix ADC Session Token Leak (CitrixBleed)",
       "assets": [
@@ -66,9 +18,9 @@
         "load-balancer-prod-02"
       ],
       "business_service": "Customer Login",
-      "narrative_md": "**Why this ranks here** \u2014 The Citrix ADC Session Token Leak (CVE-2023-4966) poses a critical risk to TawasolPay, as it allows attackers to harvest session tokens, enabling them to bypass multi-factor authentication (MFA) and access customer-facing services. This vulnerability is actively exploited by the IronVeil group, which targets financial services, leading to potential service disruptions and significant revenue loss due to blocked customer transactions. The exposure of the load balancer to the internet further amplifies the risk, especially given the critical nature of the Customer Login service and its compliance implications under GDPR.\n\n**Recommended actions (NIST SP 800-53)** \u2014 \n- Apply mitigations and kill all active and persistent sessions as per vendor instructions [SC-23.1].\n- Generate unique session identifiers for each session to prevent reuse of valid session IDs [SC-23.3].\n- Implement automatic session termination after a defined period of inactivity to reduce the window of opportunity for exploitation [AC-12].\n- Ensure that all session identifiers are invalidated upon user logout to enhance session security [SC-23.1].\n- Review and enhance monitoring for unusual session activity to detect potential exploitation attempts.\n\n**Urgency** \u2014 A patch is available, but the vulnerability has been open for 180 days, necessitating immediate action.",
+      "narrative_md": "**Why this ranks here** \u2013 The internet\u2011exposed Citrix NetScaler ADC (load\u2011balancer\u2011prod\u201101) protects the critical \u201cCustomer Login\u201d service (GDPR\u2011scope, revenue\u2011critical). An active IronVeil campaign is exploiting CVE\u20112023\u20114966 to harvest session tokens, bypass MFA and sell them to ransomware affiliates, meaning a breach would halt all customer\u2011facing transactions and trigger severe compliance and revenue loss. Exploit and patch are both publicly available, yet the vulnerability has remained un\u2011remediated for 180\u202fdays, amplifying exposure.\n\n**Recommended actions (NIST SP\u202f800\u201153)**  \n- Apply the vendor\u2011provided mitigations and terminate all active/persistent sessions immediately, or decommission the NetScaler product if mitigations cannot be applied (per KEV guidance).  \n- Invalidate session identifiers at logout or any session termination to prevent reuse of harvested tokens [SC-23.1].  \n- Enforce generation of unique, system\u2011generated session identifiers for every session to block replay of captured IDs [SC-23.3].  \n- Strengthen session authenticity controls to ensure cryptographic validation of session traffic end\u2011to\u2011end [SC-23].  \n\n**Urgency** \u2013 Patch and mitigations are available, but the flaw has been open for 180\u202fdays with active exploitation; immediate remediation is required.",
       "cited_controls": [
-        "AC-12",
+        "SC-23",
         "SC-23.1",
         "SC-23.3"
       ],
@@ -93,13 +45,6 @@
           "family": "System and Communications Protection",
           "statement": "Protect the authenticity of communications sessions.",
           "guidance": "Protecting session authenticity addresses communications protection at the session level, not at the packet level. Such protection establishes grounds for confidence at both ends of communications sessions in the ongoing identities of other parties and the validity of transmitted information. Authenticity protection includes protecting against \"man-in-the-middle\" attacks, session hijacking, and the insertion of false information into sessions."
-        },
-        {
-          "control_id": "AC-12",
-          "title": "Session Termination",
-          "family": "Access Control",
-          "statement": "Automatically terminate a user session after [organization-defined value].",
-          "guidance": "Session termination addresses the termination of user-initiated logical sessions (in contrast to [SC-10](#sc-10) , which addresses the termination of network connections associated with communications sessions (i.e., network disconnect)). A logical session (for local, network, and remote access) is initiated whenever a user (or process acting on behalf of a user) accesses an organizational system. Such user sessions can be terminated without terminating network sessions. Session termination ends all processes associated with a user\u2019s logical session except for those processes that are specifically created by the user (i.e., session owner) to continue after the session is terminated. Conditions or trigger events that require automatic termination of the session include organization-defined periods of user inactivity, targeted responses to certain types of incidents, or time-of-day restrictions on system use."
         }
       ],
       "retrieval_query": "Citrix ADC Session Token Leak (CitrixBleed) NetScaler ADC Load Balancer session authenticity invalidate session identifiers session termination flaw remediation security patches software updates incident handling response malicious code system monitoring endpoint detection remote access boundary protection Apply Citrix ADC patch for CVE-2023-4966; invalidate all active sessions; review session logs for token theft indicators || Citrix ADC Session Token Leak (CitrixBleed) session authenticity invalidate session identifiers session termination",
@@ -107,27 +52,125 @@
       "agent_trace": [
         "build_query: 2 queries (evidence + hint vocabulary, class list and/or LLM expansion)",
         "retrieve: 6 controls [SC-23.1, SC-23.3, SC-23, AC-12, AU-14, AC-12.2]",
-        "grade(LLM): 4 applicable, sufficient=True",
+        "grade(LLM): 3 applicable, sufficient=True",
+        "generate(LLM): draft produced",
+        "verify: PASS"
+      ]
+    },
+    {
+      "rank": 2,
+      "risk_score": 67.5,
+      "cve": "CVE-SYN-2026-0010",
+      "title": "Payment API Insecure Direct Object Reference",
+      "assets": [
+        "payment-api-prod-01"
+      ],
+      "business_service": "Payment Processing",
+      "narrative_md": "**Why this ranks here** \u2013 The production payment API is internet\u2011exposed and suffers an Insecure Direct Object Reference (IDOR) that requires no authentication, giving IronVeil a direct path to bypass controls and harvest session tokens. An exploit is publicly available, a patch exists, and the group is actively exploiting related CitrixBleed chains, with ransomware affiliates already linked to the threat. Failure of this service would halt payments, trigger a PCI\u2011DSS breach, and impact critical revenue, while the RTO is only 1\u202fhour, amplifying business risk.\n\n**Recommended actions (NIST SP\u202f800\u201153)**  \n- Enforce strict authorization checks on all API endpoints to ensure only permitted subjects can access payment objects [AC-3].  \n- Apply a mandatory access control policy that prevents subjects from accessing or forwarding payment records without explicit rights [AC-3.3].  \n- Deploy a tamper\u2011proof reference monitor to validate every request to the payment handler and log violations for rapid detection [AC-25].  \n- Install the vendor\u2011released patch for the Node.js/Ubuntu stack immediately and verify remediation through automated testing.  \n- Conduct a focused code review of the payment handler to eliminate IDOR patterns and integrate token\u2011validation mechanisms.\n\n**Urgency** \u2013 A patch is available and the finding has been open for 11\u202fdays; immediate remediation is required.",
+      "cited_controls": [
+        "AC-25",
+        "AC-3",
+        "AC-3.3"
+      ],
+      "retrieved_controls": [
+        {
+          "control_id": "AC-3",
+          "title": "Access Enforcement",
+          "family": "Access Control",
+          "statement": "Enforce approved authorizations for logical access to information and system resources in accordance with applicable access control policies.",
+          "guidance": "Access control policies control access between active entities or subjects (i.e., users or processes acting on behalf of users) and passive entities or objects (i.e., devices, files, records, domains) in organizational systems. In addition to enforcing authorized access at the system level and recognizing that systems can host many applications and services in support of mission and business functions, access enforcement mechanisms can also be employed at the application and service level to provide increased information security and privacy. In contrast to logical access controls that are implemented within the system, physical access controls are addressed by the controls in the Physical and Environmental Protection ( [PE](#pe) ) family."
+        },
+        {
+          "control_id": "AC-3.3",
+          "title": "Mandatory Access Control",
+          "family": "Access Control",
+          "statement": "Enforce [organization-defined value] over the set of covered subjects and objects specified in the policy, and where the policy: Is uniformly enforced across the covered subjects and objects within the system; Specifies that a subject that has been granted access to information is constrained from doing any of the following; Passing the information to unauthorized subjects or objects; Granting its privileges to other subjects; Changing one or more security attributes (specified by the policy) on subjects, objects, the system, or system components; Choosing the security attributes and attribute values (specified by the policy) to be associated with newly created or modified objects; and Changing the rules governing access control; and Specifies that [organization-defined value] may explicitly be granted [organization-defined value] such that they are not limited by any defined subset (or all) of the above constraints.",
+          "guidance": "Mandatory access control is a type of nondiscretionary access control. Mandatory access control policies constrain what actions subjects can take with information obtained from objects for which they have already been granted access. This prevents the subjects from passing the information to unauthorized subjects and objects. Mandatory access control policies constrain actions that subjects can take with respect to the propagation of access control privileges; that is, a subject with a privilege cannot pass that privilege to other subjects. The policy is uniformly enforced over all subjects and objects to which the system has control. Otherwise, the access control policy can be circumvented. This enforcement is provided by an implementation that meets the reference monitor concept as described in [AC-25](#ac-25) . The policy is bounded by the system (i.e., once the information is passed outside of the control of the system, additional means may be required to ensure that the constraints on the information remain in effect). The trusted subjects described above are granted privileges consistent with the concept of least privilege (see [AC-6](#ac-6) ). Trusted subjects are only given the minimum privileges necessary for satisfying organizational mission/business needs relative to the above policy. The control is most applicable when there is a mandate that establishes a policy regarding access to controlled unclassified information or classified information and some users of the system are not authorized access to all such information resident in the system. Mandatory access control can operate in conjunction with discretionary access control as described in [AC-3(4)](#ac-3.4) . A subject constrained in its operation by mandatory access control policies can still operate under the less rigorous constraints of AC-3(4), but mandatory access control policies take precedence over the less rigorous constraints of AC-3(4). For example, while a mandatory access control policy imposes a constraint that prevents a subject from passing information to another subject operating at a different impact or classification level, AC-3(4) permits the subject to pass the information to any other subject with the same impact or classification level as the subject. Examples of mandatory access control policies include the Bell-LaPadula policy to protect confidentiality of information and the Biba policy to protect the integrity of information."
+        },
+        {
+          "control_id": "AC-25",
+          "title": "Reference Monitor",
+          "family": "Access Control",
+          "statement": "Implement a reference monitor for [organization-defined value] that is tamperproof, always invoked, and small enough to be subject to analysis and testing, the completeness of which can be assured.",
+          "guidance": "A reference monitor is a set of design requirements on a reference validation mechanism that, as a key component of an operating system, enforces an access control policy over all subjects and objects. A reference validation mechanism is always invoked, tamper-proof, and small enough to be subject to analysis and tests, the completeness of which can be assured (i.e., verifiable). Information is represented internally within systems using abstractions known as data structures. Internal data structures can represent different types of entities, both active and passive. Active entities, also known as subjects, are associated with individuals, devices, or processes acting on behalf of individuals. Passive entities, also known as objects, are associated with data structures, such as records, buffers, communications ports, tables, files, and inter-process pipes. Reference monitors enforce access control policies that restrict access to objects based on the identity of subjects or groups to which the subjects belong. The system enforces the access control policy based on the rule set established by the policy. The tamper-proof property of the reference monitor prevents determined adversaries from compromising the functioning of the reference validation mechanism. The always invoked property prevents adversaries from bypassing the mechanism and violating the security policy. The smallness property helps to ensure completeness in the analysis and testing of the mechanism to detect any weaknesses or deficiencies (i.e., latent flaws) that would prevent the enforcement of the security policy."
+        }
+      ],
+      "retrieval_query": "Payment API Insecure Direct Object Reference Payment Handler API Server enforce approved authorizations logical access enforcement least privilege information input validation flaw remediation security patches software updates incident handling response malicious code remote access boundary protection Patch API gateway immediately; rotate all API keys and tokens; add regression authentication test to CI/CD pipeline; review API logs for unauthorized access || Payment API Insecure Direct Object Reference enforce approved authorizations logical access enforcement least privilege information input validation",
+      "generation_mode": "llm_grounded",
+      "agent_trace": [
+        "build_query: 2 queries (evidence + hint vocabulary, class list and/or LLM expansion)",
+        "retrieve: 6 controls [AC-3, AC-3.3, AC-25, AC-4, IA-13.2, CA-3.6]",
+        "grade(LLM): 3 applicable, sufficient=True",
         "generate(LLM): draft produced",
         "verify: PASS"
       ]
     },
     {
       "rank": 3,
-      "risk_score": 97.4,
+      "risk_score": 63.3,
+      "cve": "CVE-2024-21762",
+      "title": "Fortinet SSL-VPN Heap Buffer Overflow RCE",
+      "assets": [
+        "vpn-edge-02",
+        "vpn-edge-01",
+        "vpn-staging"
+      ],
+      "business_service": "Remote Access",
+      "narrative_md": "**Why this ranks here** \u2013 The internet\u2011exposed FortiGate VPN (CVE\u20112024\u201121762) carries a CVSS\u202f9.8 score, an active exploit in the KEV list, and a weaponized CrimsonJackal campaign that has already hit a Dubai fintech firm, leading to ransomware within 4\u20116\u202fdays. With remote\u2011access services critical to revenue and ISO\u202f27001 compliance, any compromise would block administrators and employees, causing severe operational and financial loss.\n\n**Recommended actions (NIST SP\u202f800\u201153)**  \n- Apply the vendor\u2011provided mitigations or retire the vulnerable firmware immediately, as mandated by the KEV advisory\u202f[SI-2].  \n- Test the released patch in a controlled environment and install it on all production FortiGate devices within the organization\u2011defined timeframe\u202f[SI-2].  \n- Deploy an automated patch\u2011management solution to ensure timely distribution of the FortiGate update across the VPN fleet\u202f[SI-2.4].  \n- Update the configuration\u2011management database to record the flaw, remediation status, and any decommission decisions\u202f[SI-2].  \n- Verify that endpoint detection and response (EDR) is enabled on VPN appliances to improve post\u2011exploitation visibility\u202f[SI-2].\n\n**Urgency** \u2013 A patch has been available for 27\u202fdays; given the high\u2011severity exploit and active ransomware targeting, immediate remediation is required.",
+      "cited_controls": [
+        "SI-2",
+        "SI-2.4"
+      ],
+      "retrieved_controls": [
+        {
+          "control_id": "SI-2",
+          "title": "Flaw Remediation",
+          "family": "System and Information Integrity",
+          "statement": "Identify, report, and correct system flaws; Test software and firmware updates related to flaw remediation for effectiveness and potential side effects before installation; Install security-relevant software and firmware updates within [organization-defined value] of the release of the updates; and Incorporate flaw remediation into the organizational configuration management process.",
+          "guidance": "The need to remediate system flaws applies to all types of software and firmware. Organizations identify systems affected by software flaws, including potential vulnerabilities resulting from those flaws, and report this information to designated organizational personnel with information security and privacy responsibilities. Organizations consider establishing a controlled patching environment for mission-critical systems. Security-relevant updates include patches, service packs, and malicious code signatures. Organizations also address flaws discovered during assessments, continuous monitoring, incident response activities, and system error handling. By incorporating flaw remediation into configuration management processes, required remediation actions can be tracked and verified. Organization-defined time periods for updating security-relevant software and firmware may vary based on a variety of risk factors, including the security category of the system, the criticality of the update (i.e., severity of the vulnerability related to the discovered flaw), the organizational risk tolerance, the mission supported by the system, or the threat environment. Some types of flaw remediation may require more testing than other types. Organizations determine the type of testing needed for the specific type of flaw remediation activity under consideration and the types of changes that are to be configuration-managed. Flaw remediation testing addresses both effectiveness of addressing security issues and for potential side effects on functionality, system and system component performance and operations. When implementing remediation activities, organizations consider the order and timing of updates to validate correct execution within the system environment, and to support system and component availability needs (i.e., implementing a staggered deployment strategy). In some situations, organizations may determine that the testing of software or firmware updates is not necessary or practical, such as when implementing simple malicious code signature updates. In testing decisions, organizations consider whether security-relevant software or firmware updates are obtained from authorized sources with appropriate digital signatures. When implementing remediation activities, organizations consider the order and timing of updates to validate correct execution within the system environment, and to support system and component availability needs (i.e., implementing a staggered deployment strategy). Organizations verify that software and firmware updates come from authorized sources prior to downloading."
+        },
+        {
+          "control_id": "SI-2.4",
+          "title": "Automated Patch Management Tools",
+          "family": "System and Information Integrity",
+          "statement": "Employ automated patch management tools to facilitate flaw remediation to the following system components: [organization-defined value].",
+          "guidance": "Using automated tools to support patch management helps to ensure the timeliness and completeness of system patching operations."
+        }
+      ],
+      "retrieval_query": "Fortinet SSL-VPN Heap Buffer Overflow RCE VPN Firmware VPN Gateway flaw remediation security patches software updates incident handling response malicious code system monitoring endpoint detection remote access boundary protection Apply vendor firmware patch immediately; isolate management plane from internet; block inbound connections on VPN ports until patched; review VPN logs for IOCs from past 30 days",
+      "generation_mode": "llm_grounded",
+      "agent_trace": [
+        "build_query: 1 query (evidence + hint vocabulary, class list and/or LLM expansion)",
+        "retrieve: 6 controls [AC-17, SC-7.7, SI-2, SI-2.4, SC-5, SA-22]",
+        "grade(LLM): 2 applicable, sufficient=True",
+        "generate(LLM): draft produced",
+        "verify: PASS"
+      ]
+    },
+    {
+      "rank": 4,
+      "risk_score": 61.8,
       "cve": "CVE-SYN-2026-0001",
       "title": "Remote Code Execution in Web Framework",
       "assets": [
         "auth-gateway-prod-01"
       ],
       "business_service": "Customer Login",
-      "narrative_md": "**Why this ranks here** \u2014 This risk is critical due to the potential for remote code execution on an internet-exposed web server, impacting the Customer Login service. Exploitation could lead to complete service disruption, blocking all customer-facing transactions and severely affecting revenue and compliance with GDPR. The vulnerability (CVE-SYN-2026-0001) has been weaponized and is actively targeted by the ShadowMint actor in the \"Portal Crush\" campaign, increasing the urgency for remediation.\n\n**Recommended actions (NIST SP 800-53)** \u2014 \n- Implement a comprehensive vulnerability scanning program to continuously monitor for vulnerabilities in the web framework and related components [RA-5].\n- Prioritize and install the available patch for CVE-SYN-2026-0001 to remediate the identified flaw promptly [SI-2].\n- Conduct regular security assessments and interactive application security testing to identify and address potential vulnerabilities in the web application [SA-11.9].\n- Ensure that all internet-facing assets are included in the vulnerability management process to mitigate exposure risks [RA-5].\n\n**Urgency** \u2014 The patch is available, but the vulnerability has been open for 18 days, necessitating immediate action.",
+      "narrative_md": "**Why this ranks here** \u2013 The production auth\u2011gateway is internet\u2011exposed and runs a vulnerable web framework (CVE\u2011SYN\u20112026\u20110001) with a CVSS\u202f9.8 score. An exploit is publicly available and the ShadowMint \u201cPortal\u202fCrush\u201d campaign has already attempted exploitation against UAE portals, giving a high likelihood of successful RCE. Successful compromise would block the Customer Login service, a critical, GDPR\u2011scoped, customer\u2011facing function, halting all transactions and breaching compliance.  \n\n**Recommended actions (NIST SP\u202f800\u201153)**  \n- Deploy the vendor\u2011supplied fix immediately and verify its effectiveness before production rollout [SI-2].  \n- Verify that the patch is installed on all maintenance tools and related components to prevent a secondary vector [MA-3.6].  \n- Conduct a full vulnerability scan of the web server and any dependent services to confirm no other exploitable flaws remain [RA-5].  \n- Run interactive application security testing on the web framework to detect any residual or related weaknesses before and after patching [SA-11.9].  \n\n**Urgency** \u2013 A patch exists but the finding has been open for 18\u202fdays; rapid remediation is required.",
       "cited_controls": [
+        "MA-3.6",
         "RA-5",
         "SA-11.9",
         "SI-2"
       ],
       "retrieved_controls": [
+        {
+          "control_id": "SI-2",
+          "title": "Flaw Remediation",
+          "family": "System and Information Integrity",
+          "statement": "Identify, report, and correct system flaws; Test software and firmware updates related to flaw remediation for effectiveness and potential side effects before installation; Install security-relevant software and firmware updates within [organization-defined value] of the release of the updates; and Incorporate flaw remediation into the organizational configuration management process.",
+          "guidance": "The need to remediate system flaws applies to all types of software and firmware. Organizations identify systems affected by software flaws, including potential vulnerabilities resulting from those flaws, and report this information to designated organizational personnel with information security and privacy responsibilities. Organizations consider establishing a controlled patching environment for mission-critical systems. Security-relevant updates include patches, service packs, and malicious code signatures. Organizations also address flaws discovered during assessments, continuous monitoring, incident response activities, and system error handling. By incorporating flaw remediation into configuration management processes, required remediation actions can be tracked and verified. Organization-defined time periods for updating security-relevant software and firmware may vary based on a variety of risk factors, including the security category of the system, the criticality of the update (i.e., severity of the vulnerability related to the discovered flaw), the organizational risk tolerance, the mission supported by the system, or the threat environment. Some types of flaw remediation may require more testing than other types. Organizations determine the type of testing needed for the specific type of flaw remediation activity under consideration and the types of changes that are to be configuration-managed. Flaw remediation testing addresses both effectiveness of addressing security issues and for potential side effects on functionality, system and system component performance and operations. When implementing remediation activities, organizations consider the order and timing of updates to validate correct execution within the system environment, and to support system and component availability needs (i.e., implementing a staggered deployment strategy). In some situations, organizations may determine that the testing of software or firmware updates is not necessary or practical, such as when implementing simple malicious code signature updates. In testing decisions, organizations consider whether security-relevant software or firmware updates are obtained from authorized sources with appropriate digital signatures. When implementing remediation activities, organizations consider the order and timing of updates to validate correct execution within the system environment, and to support system and component availability needs (i.e., implementing a staggered deployment strategy). Organizations verify that software and firmware updates come from authorized sources prior to downloading."
+        },
         {
           "control_id": "RA-5",
           "title": "Vulnerability Monitoring and Scanning",
@@ -136,11 +179,11 @@
           "guidance": "Security categorization of information and systems guides the frequency and comprehensiveness of vulnerability monitoring (including scans). Organizations determine the required vulnerability monitoring for system components, ensuring that the potential sources of vulnerabilities\u2014such as infrastructure components (e.g., switches, routers, guards, sensors), networked printers, scanners, and copiers\u2014are not overlooked. The capability to readily update vulnerability monitoring tools as new vulnerabilities are discovered and announced and as new scanning methods are developed helps to ensure that new vulnerabilities are not missed by employed vulnerability monitoring tools. The vulnerability monitoring tool update process helps to ensure that potential vulnerabilities in the system are identified and addressed as quickly as possible. Vulnerability monitoring and analyses for custom software may require additional approaches, such as static analysis, dynamic analysis, binary analysis, or a hybrid of the three approaches. Organizations can use these analysis approaches in source code reviews and in a variety of tools, including web-based application scanners, static analysis tools, and binary analyzers. Vulnerability monitoring includes scanning for patch levels; scanning for functions, ports, protocols, and services that should not be accessible to users or devices; and scanning for flow control mechanisms that are improperly configured or operating incorrectly. Vulnerability monitoring may also include continuous vulnerability monitoring tools that use instrumentation to continuously analyze components. Instrumentation-based tools may improve accuracy and may be run throughout an organization without scanning. Vulnerability monitoring tools that facilitate interoperability include tools that are Security Content Automated Protocol (SCAP)-validated. Thus, organizations consider using scanning tools that express vulnerabilities in the Common Vulnerabilities and Exposures (CVE) naming convention and that employ the Open Vulnerability Assessment Language (OVAL) to determine the presence of vulnerabilities. Sources for vulnerability information include the Common Weakness Enumeration (CWE) listing and the National Vulnerability Database (NVD). Control assessments, such as red team exercises, provide additional sources of potential vulnerabilities for which to scan. Organizations also consider using scanning tools that express vulnerability impact by the Common Vulnerability Scoring System (CVSS). Vulnerability monitoring includes a channel and process for receiving reports of security vulnerabilities from the public at-large. Vulnerability disclosure programs can be as simple as publishing a monitored email address or web form that can receive reports, including notification authorizing good-faith research and disclosure of security vulnerabilities. Organizations generally expect that such research is happening with or without their authorization and can use public vulnerability disclosure channels to increase the likelihood that discovered vulnerabilities are reported directly to the organization for remediation. Organizations may also employ the use of financial incentives (also known as \"bug bounties\" ) to further encourage external security researchers to report discovered vulnerabilities. Bug bounty programs can be tailored to the organization\u2019s needs. Bounties can be operated indefinitely or over a defined period of time and can be offered to the general public or to a curated group. Organizations may run public and private bounties simultaneously and could choose to offer partially credentialed access to certain participants in order to evaluate security vulnerabilities from privileged vantage points."
         },
         {
-          "control_id": "SI-2",
-          "title": "Flaw Remediation",
-          "family": "System and Information Integrity",
-          "statement": "Identify, report, and correct system flaws; Test software and firmware updates related to flaw remediation for effectiveness and potential side effects before installation; Install security-relevant software and firmware updates within [organization-defined value] of the release of the updates; and Incorporate flaw remediation into the organizational configuration management process.",
-          "guidance": "The need to remediate system flaws applies to all types of software and firmware. Organizations identify systems affected by software flaws, including potential vulnerabilities resulting from those flaws, and report this information to designated organizational personnel with information security and privacy responsibilities. Organizations consider establishing a controlled patching environment for mission-critical systems. Security-relevant updates include patches, service packs, and malicious code signatures. Organizations also address flaws discovered during assessments, continuous monitoring, incident response activities, and system error handling. By incorporating flaw remediation into configuration management processes, required remediation actions can be tracked and verified. Organization-defined time periods for updating security-relevant software and firmware may vary based on a variety of risk factors, including the security category of the system, the criticality of the update (i.e., severity of the vulnerability related to the discovered flaw), the organizational risk tolerance, the mission supported by the system, or the threat environment. Some types of flaw remediation may require more testing than other types. Organizations determine the type of testing needed for the specific type of flaw remediation activity under consideration and the types of changes that are to be configuration-managed. Flaw remediation testing addresses both effectiveness of addressing security issues and for potential side effects on functionality, system and system component performance and operations. When implementing remediation activities, organizations consider the order and timing of updates to validate correct execution within the system environment, and to support system and component availability needs (i.e., implementing a staggered deployment strategy). In some situations, organizations may determine that the testing of software or firmware updates is not necessary or practical, such as when implementing simple malicious code signature updates. In testing decisions, organizations consider whether security-relevant software or firmware updates are obtained from authorized sources with appropriate digital signatures. When implementing remediation activities, organizations consider the order and timing of updates to validate correct execution within the system environment, and to support system and component availability needs (i.e., implementing a staggered deployment strategy). Organizations verify that software and firmware updates come from authorized sources prior to downloading."
+          "control_id": "MA-3.6",
+          "title": "Software Updates and Patches",
+          "family": "Maintenance",
+          "statement": "Inspect maintenance tools to ensure the latest software updates and patches are installed.",
+          "guidance": "Maintenance tools using outdated and/or unpatched software can provide a threat vector for adversaries and result in a significant vulnerability for organizations."
         },
         {
           "control_id": "SA-11.9",
@@ -150,30 +193,30 @@
           "guidance": "Interactive (also known as instrumentation-based) application security testing is a method of detecting vulnerabilities by observing applications as they run during testing. The use of instrumentation relies on direct measurements of the actual running applications and uses access to the code, user interaction, libraries, frameworks, backend connections, and configurations to directly measure control effectiveness. When combined with analysis techniques, interactive application security testing can identify a broad range of potential vulnerabilities and confirm control effectiveness. Instrumentation-based testing works in real time and can be used continuously throughout the system development life cycle."
         }
       ],
-      "retrieval_query": "Remote Code Execution in Web Framework Web Framework Web Server flaw remediation security patches software updates remote access boundary protection Apply vendor firmware patch immediately; isolate management plane from internet; block inbound connections on VPN ports until patched; review VPN logs for IOCs from past 30 days || Remote Code Execution in Web Framework System and Communications Protection, code execution, vulnerability management, security controls.",
+      "retrieval_query": "Remote Code Execution in Web Framework Web Framework Web Server flaw remediation security patches software updates remote access boundary protection Apply vendor firmware patch immediately; isolate management plane from internet; block inbound connections on VPN ports until patched; review VPN logs for IOCs from past 30 days",
       "generation_mode": "llm_grounded",
       "agent_trace": [
-        "build_query: 2 queries (evidence + hint vocabulary, class list and/or LLM expansion)",
-        "retrieve: 6 controls [RA-5, SC-18.5, AC-17.4, SI-2, SI-3, SA-11.9]",
-        "grade(LLM): 3 applicable, sufficient=True",
+        "build_query: 1 query (evidence + hint vocabulary, class list and/or LLM expansion)",
+        "retrieve: 6 controls [SI-2, AC-17, RA-5, SC-7.7, MA-3.6, SA-11.9]",
+        "grade(LLM): 4 applicable, sufficient=True",
         "generate(LLM): draft produced",
         "verify: PASS"
       ]
     },
     {
-      "rank": 4,
-      "risk_score": 91.7,
+      "rank": 5,
+      "risk_score": 59.5,
       "cve": "CVE-SYN-2026-0011",
       "title": "Kong Gateway Admin API Exposed",
       "assets": [
         "partner-api-gateway-prod"
       ],
       "business_service": "Partner API Gateway",
-      "narrative_md": "**Why this ranks here** \u2014 The exposure of the Kong Gateway Admin API presents a critical risk, as it allows the WinterViper group to gain full control over proxied routes, leading to potential financial fraud and data theft. Given the high revenue impact on the Partner API Gateway and the compliance requirements under PCI DSS and ISO 27001, any exploitation could result in significant financial losses and SLA breach penalties, affecting customer trust and business operations.\n\n**Recommended actions (NIST SP 800-53)** \u2014 \n- Implement boundary protection mechanisms to monitor and control communications at the API Gateway, ensuring that only authorized traffic is allowed [SC-7].\n- Establish a traffic flow policy for the managed interface of the Partner API Gateway to protect the confidentiality and integrity of transmitted information [SC-7.4].\n- Isolate the API Gateway from other internal systems to limit unauthorized information flows and enhance security for sensitive components [SC-7.21].\n- Regularly review and update the traffic flow policy exceptions to ensure they are justified and necessary for business operations [SC-7.4].\n\n**Urgency** \u2014 A patch is available, and the vulnerability has been open for 5 days, necessitating immediate action to mitigate risk.",
+      "narrative_md": "**Why this ranks here** \u2013 The Kong Gateway admin API is internet\u2011exposed without authentication, giving an attacker immediate privileged control of the production partner API gateway.\u202fWinterViper has a weaponized campaign targeting this exact flaw, and the exploit is publicly available, so successful abuse can reroute payment traffic, inject fraudulent transactions, and cause partner\u2011integration outages that breach high\u2011value SLAs and PCI\u2011DSS compliance\u202f\u2014\u202fdirect financial loss and penalty exposure.\n\n**Recommended actions (NIST SP\u202f800\u201153)**  \n- Deploy a dedicated, managed firewall or reverse\u2011proxy to isolate the admin interface from the public Internet and enforce strict inbound filtering\u202f[SC-7].  \n- Restrict the admin API to privileged accounts only; remove management functions from any non\u2011privileged user endpoints\u202f[SC-2.1].  \n- Route all privileged remote sessions through a hardened jump host with full logging and multi\u2011factor authentication\u202f[SC-7.15].  \n- Apply the vendor\u2011released patch for CVE\u2011SYN\u20112026\u20110011 immediately and verify remediation via vulnerability scanning.  \n- Enable continuous monitoring of the admin interface for anomalous configuration changes and alert on any unauthorized access attempts.\n\n**Urgency** \u2013 A patch exists, the vulnerability has been exploitable for\u202f5\u202fdays, and the CVSS\u202f9.3 score indicates a critical, time\u2011sensitive risk.",
       "cited_controls": [
+        "SC-2.1",
         "SC-7",
-        "SC-7.21",
-        "SC-7.4"
+        "SC-7.15"
       ],
       "retrieved_controls": [
         {
@@ -184,25 +227,11 @@
           "guidance": "Managed interfaces include gateways, routers, firewalls, guards, network-based malicious code analysis, virtualization systems, or encrypted tunnels implemented within a security architecture. Subnetworks that are physically or logically separated from internal networks are referred to as demilitarized zones or DMZs. Restricting or prohibiting interfaces within organizational systems includes restricting external web traffic to designated web servers within managed interfaces, prohibiting external traffic that appears to be spoofing internal addresses, and prohibiting internal traffic that appears to be spoofing external addresses. [SP 800-189](#f5edfe51-d1f2-422e-9b27-5d0e90b49c72) provides additional information on source address validation techniques to prevent ingress and egress of traffic with spoofed addresses. Commercial telecommunications services are provided by network components and consolidated management systems shared by customers. These services may also include third party-provided access lines and other service elements. Such services may represent sources of increased risk despite contract security provisions. Boundary protection may be implemented as a common control for all or part of an organizational network such that the boundary to be protected is greater than a system-specific boundary (i.e., an authorization boundary)."
         },
         {
-          "control_id": "SC-7.18",
-          "title": "Fail Secure",
+          "control_id": "SC-2.1",
+          "title": "Interfaces for Non-privileged Users",
           "family": "System and Communications Protection",
-          "statement": "Prevent systems from entering unsecure states in the event of an operational failure of a boundary protection device.",
-          "guidance": "Fail secure is a condition achieved by employing mechanisms to ensure that in the event of operational failures of boundary protection devices at managed interfaces, systems do not enter into unsecure states where intended security properties no longer hold. Managed interfaces include routers, firewalls, and application gateways that reside on protected subnetworks (commonly referred to as demilitarized zones). Failures of boundary protection devices cannot lead to or cause information external to the devices to enter the devices nor can failures permit unauthorized information releases."
-        },
-        {
-          "control_id": "SC-7.4",
-          "title": "External Telecommunications Services",
-          "family": "System and Communications Protection",
-          "statement": "Implement a managed interface for each external telecommunication service; Establish a traffic flow policy for each managed interface; Protect the confidentiality and integrity of the information being transmitted across each interface; Document each exception to the traffic flow policy with a supporting mission or business need and duration of that need; Review exceptions to the traffic flow policy [organization-defined value] and remove exceptions that are no longer supported by an explicit mission or business need; Prevent unauthorized exchange of control plane traffic with external networks; Publish information to enable remote networks to detect unauthorized control plane traffic from internal networks; and Filter unauthorized control plane traffic from external networks.",
-          "guidance": "External telecommunications services can provide data and/or voice communications services. Examples of control plane traffic include Border Gateway Protocol (BGP) routing, Domain Name System (DNS), and management protocols. See [SP 800-189](#f5edfe51-d1f2-422e-9b27-5d0e90b49c72) for additional information on the use of the resource public key infrastructure (RPKI) to protect BGP routes and detect unauthorized BGP announcements."
-        },
-        {
-          "control_id": "SC-7.21",
-          "title": "Isolation of System Components",
-          "family": "System and Communications Protection",
-          "statement": "Employ boundary protection mechanisms to isolate [organization-defined value] supporting [organization-defined value].",
-          "guidance": "Organizations can isolate system components that perform different mission or business functions. Such isolation limits unauthorized information flows among system components and provides the opportunity to deploy greater levels of protection for selected system components. Isolating system components with boundary protection mechanisms provides the capability for increased protection of individual system components and to more effectively control information flows between those components. Isolating system components provides enhanced protection that limits the potential harm from hostile cyber-attacks and errors. The degree of isolation varies depending upon the mechanisms chosen. Boundary protection mechanisms include routers, gateways, and firewalls that separate system components into physically separate networks or subnetworks; cross-domain devices that separate subnetworks; virtualization techniques; and the encryption of information flows among system components using distinct encryption keys."
+          "statement": "Prevent the presentation of system management functionality at interfaces to non-privileged users.",
+          "guidance": "Preventing the presentation of system management functionality at interfaces to non-privileged users ensures that system administration options, including administrator privileges, are not available to the general user population. Restricting user access also prohibits the use of the grey-out option commonly used to eliminate accessibility to such information. One potential solution is to withhold system administration options until users establish sessions with administrator privileges."
         },
         {
           "control_id": "SC-7.15",
@@ -217,56 +246,6 @@
       "agent_trace": [
         "build_query: 2 queries (evidence + hint vocabulary, class list and/or LLM expansion)",
         "retrieve: 6 controls [SC-7, SC-7.18, SC-2.1, SC-7.4, SC-7.21, SC-7.15]",
-        "grade(LLM): 5 applicable, sufficient=True",
-        "generate(LLM): draft produced",
-        "verify: PASS"
-      ]
-    },
-    {
-      "rank": 5,
-      "risk_score": 79.8,
-      "cve": "CVE-2024-21762",
-      "title": "Fortinet SSL-VPN Heap Buffer Overflow RCE",
-      "assets": [
-        "vpn-edge-01",
-        "vpn-edge-02",
-        "vpn-staging"
-      ],
-      "business_service": "Remote Access",
-      "narrative_md": "**Why this ranks here** \u2014 The vulnerability CVE-2024-21762 in Fortinet's SSL-VPN presents a critical risk due to its high CVSS score of 9.8 and active exploitation by the threat actor CrimsonJackal, who targets financial services in the Gulf region. The potential for remote code execution could lead to significant business impact, including loss of secure network access for remote employees, which directly affects service delivery and compliance with ISO 27001. Given the actor's history of lateral movement and ransomware deployment, the risk of data exfiltration and operational disruption is substantial.\n\n**Recommended actions (NIST SP 800-53)** \u2014 \n- Apply mitigations per vendor instructions for CVE-2024-21762 immediately to secure the VPN gateways [SI-2].\n- Discontinue use of the product if mitigations are unavailable, as per CISA's guidance [SI-2].\n- Review and document remote access configurations to ensure compliance with organizational policies [AC-17].\n- Implement encryption mechanisms for remote access sessions to protect data integrity and confidentiality [AC-17.2].\n\n**Urgency** \u2014 The patch has been available for 27 days, and immediate action is required to mitigate this critical vulnerability.",
-      "cited_controls": [
-        "AC-17",
-        "AC-17.2",
-        "SI-2"
-      ],
-      "retrieved_controls": [
-        {
-          "control_id": "AC-17",
-          "title": "Remote Access",
-          "family": "Access Control",
-          "statement": "Establish and document usage restrictions, configuration/connection requirements, and implementation guidance for each type of remote access allowed; and Authorize each type of remote access to the system prior to allowing such connections.",
-          "guidance": "Remote access is access to organizational systems (or processes acting on behalf of users) that communicate through external networks such as the Internet. Types of remote access include dial-up, broadband, and wireless. Organizations use encrypted virtual private networks (VPNs) to enhance confidentiality and integrity for remote connections. The use of encrypted VPNs provides sufficient assurance to the organization that it can effectively treat such connections as internal networks if the cryptographic mechanisms used are implemented in accordance with applicable laws, executive orders, directives, regulations, policies, standards, and guidelines. Still, VPN connections traverse external networks, and the encrypted VPN does not enhance the availability of remote connections. VPNs with encrypted tunnels can also affect the ability to adequately monitor network communications traffic for malicious code. Remote access controls apply to systems other than public web servers or systems designed for public access. Authorization of each remote access type addresses authorization prior to allowing remote access without specifying the specific formats for such authorization. While organizations may use information exchange and system connection security agreements to manage remote access connections to other systems, such agreements are addressed as part of [CA-3](#ca-3) . Enforcing access restrictions for remote access is addressed via [AC-3](#ac-3)."
-        },
-        {
-          "control_id": "SI-2",
-          "title": "Flaw Remediation",
-          "family": "System and Information Integrity",
-          "statement": "Identify, report, and correct system flaws; Test software and firmware updates related to flaw remediation for effectiveness and potential side effects before installation; Install security-relevant software and firmware updates within [organization-defined value] of the release of the updates; and Incorporate flaw remediation into the organizational configuration management process.",
-          "guidance": "The need to remediate system flaws applies to all types of software and firmware. Organizations identify systems affected by software flaws, including potential vulnerabilities resulting from those flaws, and report this information to designated organizational personnel with information security and privacy responsibilities. Organizations consider establishing a controlled patching environment for mission-critical systems. Security-relevant updates include patches, service packs, and malicious code signatures. Organizations also address flaws discovered during assessments, continuous monitoring, incident response activities, and system error handling. By incorporating flaw remediation into configuration management processes, required remediation actions can be tracked and verified. Organization-defined time periods for updating security-relevant software and firmware may vary based on a variety of risk factors, including the security category of the system, the criticality of the update (i.e., severity of the vulnerability related to the discovered flaw), the organizational risk tolerance, the mission supported by the system, or the threat environment. Some types of flaw remediation may require more testing than other types. Organizations determine the type of testing needed for the specific type of flaw remediation activity under consideration and the types of changes that are to be configuration-managed. Flaw remediation testing addresses both effectiveness of addressing security issues and for potential side effects on functionality, system and system component performance and operations. When implementing remediation activities, organizations consider the order and timing of updates to validate correct execution within the system environment, and to support system and component availability needs (i.e., implementing a staggered deployment strategy). In some situations, organizations may determine that the testing of software or firmware updates is not necessary or practical, such as when implementing simple malicious code signature updates. In testing decisions, organizations consider whether security-relevant software or firmware updates are obtained from authorized sources with appropriate digital signatures. When implementing remediation activities, organizations consider the order and timing of updates to validate correct execution within the system environment, and to support system and component availability needs (i.e., implementing a staggered deployment strategy). Organizations verify that software and firmware updates come from authorized sources prior to downloading."
-        },
-        {
-          "control_id": "AC-17.2",
-          "title": "Protection of Confidentiality and Integrity Using Encryption",
-          "family": "Access Control",
-          "statement": "Implement cryptographic mechanisms to protect the confidentiality and integrity of remote access sessions.",
-          "guidance": "Virtual private networks can be used to protect the confidentiality and integrity of remote access sessions. Transport Layer Security (TLS) is an example of a cryptographic protocol that provides end-to-end communications security over networks and is used for Internet communications and online transactions."
-        }
-      ],
-      "retrieval_query": "Fortinet SSL-VPN Heap Buffer Overflow RCE VPN Firmware VPN Gateway flaw remediation security patches software updates incident handling response malicious code system monitoring endpoint detection remote access boundary protection Apply vendor firmware patch immediately; isolate management plane from internet; block inbound connections on VPN ports until patched; review VPN logs for IOCs from past 30 days || Fortinet SSL-VPN Heap Buffer Overflow RCE System and Communications Protection, vulnerability management, incident response, access control.",
-      "generation_mode": "llm_grounded",
-      "agent_trace": [
-        "build_query: 2 queries (evidence + hint vocabulary, class list and/or LLM expansion)",
-        "retrieve: 6 controls [SC-7.7, AC-17, SC-5, SI-2, SA-15.5, AC-17.2]",
         "grade(LLM): 3 applicable, sufficient=True",
         "generate(LLM): draft produced",
         "verify: PASS"

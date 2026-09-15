@@ -20,6 +20,7 @@ Absent those env vars, `traceable` is a no-op and nothing leaves the machine.
 from __future__ import annotations
 
 import os
+import time
 
 import requests
 from dotenv import load_dotenv
@@ -27,6 +28,18 @@ from dotenv import load_dotenv
 from .observability import metrics
 
 load_dotenv()
+
+# Confirmed in real use, not hypothetical: a full 5-risk pipeline run makes
+# enough grade/generate calls in quick succession to trip Groq's free-tier
+# per-minute token limit partway through -- every call after that point was
+# silently degrading to the template fallback (an 80% fallback rate observed
+# on one real run) even though the model/prompts themselves work fine. A 429
+# is specifically transient (the quota resets on its own shortly after), so
+# it's the one failure mode worth a bounded retry rather than an immediate
+# give-up -- an expired key or a genuine outage should still fail fast.
+MAX_RATE_LIMIT_RETRIES = 2
+DEFAULT_RATE_LIMIT_WAIT = 10.0  # seconds; used when the response has no
+                                 # Retry-After header of its own
 
 try:
     from langsmith import get_current_run_tree, traceable
@@ -78,26 +91,35 @@ class LLMClient:
         if not self.configured:
             metrics.increment("llm_request", status="unconfigured")
             raise LLMUnavailable("no API key configured (LLM_API_KEY / OPENAI_API_KEY)")
-        try:
-            resp = requests.post(
-                f"{self.base_url}/chat/completions",
-                headers={"Authorization": f"Bearer {self.api_key}"},
-                json={
-                    "model": self.model,
-                    "temperature": 0,
-                    "max_tokens": max_tokens,
-                    "messages": [
-                        {"role": "system", "content": system},
-                        {"role": "user", "content": user},
-                    ],
-                },
-                timeout=self.timeout,
-            )
-            resp.raise_for_status()
-            metrics.increment("llm_request", status="success")
-            return resp.json()["choices"][0]["message"]["content"]
-        except LLMUnavailable:
-            raise
-        except Exception as exc:  # noqa: BLE001
-            metrics.increment("llm_request", status="error")
-            raise LLMUnavailable(str(exc)) from exc
+        payload = {
+            "model": self.model,
+            "temperature": 0,
+            "max_tokens": max_tokens,
+            "messages": [
+                {"role": "system", "content": system},
+                {"role": "user", "content": user},
+            ],
+        }
+        attempt = 0
+        while True:
+            try:
+                resp = requests.post(
+                    f"{self.base_url}/chat/completions",
+                    headers={"Authorization": f"Bearer {self.api_key}"},
+                    json=payload,
+                    timeout=self.timeout,
+                )
+                if resp.status_code == 429 and attempt < MAX_RATE_LIMIT_RETRIES:
+                    wait = float(resp.headers.get("retry-after", DEFAULT_RATE_LIMIT_WAIT))
+                    metrics.increment("llm_request", status="rate_limited_retry")
+                    attempt += 1
+                    time.sleep(wait)
+                    continue
+                resp.raise_for_status()
+                metrics.increment("llm_request", status="success")
+                return resp.json()["choices"][0]["message"]["content"]
+            except LLMUnavailable:
+                raise
+            except Exception as exc:  # noqa: BLE001
+                metrics.increment("llm_request", status="error")
+                raise LLMUnavailable(str(exc)) from exc
