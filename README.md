@@ -1,3 +1,14 @@
+---
+title: Cyber Risk Copilot
+emoji: 🛡️
+colorFrom: blue
+colorTo: red
+sdk: streamlit
+sdk_version: "1.63.0"
+app_file: App.py
+pinned: false
+---
+
 # TawasolPay Cyber Risk Copilot
 
 A pipeline that turns a fintech's raw security data — asset inventory,
