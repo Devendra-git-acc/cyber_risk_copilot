@@ -259,78 +259,80 @@ LangSmith tracing, eval judge model, logging, alerting).
 
 ### 1. The data split
 
-What did you embed and why? Only the NIST SP 800-53 control catalog
-(~1,237 chunks) — it's genuinely unstructured prose where a vulnerability's
-own wording and a control's wording rarely match exactly, so bridging that
-gap needs semantic similarity, not exact matching.
+I embedded the NIST 800-53 catalog and nothing else. It's the one piece of
+data in this whole project that's genuinely unstructured prose, where a
+vulnerability's own name almost never matches the control's actual wording
+— "Kong Gateway admin API exposed" and "Boundary Protection" don't share a
+single keyword, so you need semantic similarity to connect them at all.
 
-What did you query as structured records and why? All five CSVs (assets,
-vulnerabilities, threat intel, business services, remediation hints) — this
-data is relational ("which vulnerabilities sit on internet-exposed assets"
-is a join and a boolean filter, not a similarity search), and embedding it
-would trade deterministic, auditable correctness for approximate retrieval
-on data that never needed it.
+Everything else — the five CSVs — I queried directly with pandas, no
+embeddings. "Which vulnerabilities are on internet-exposed assets" is a
+join and a boolean mask, not a similarity search. Embedding structured,
+relational data like that would have traded exact, auditable answers for
+approximate ones, on data that never needed approximating in the first
+place.
 
 ### 2. Where it goes wrong
 
-**Config/data drift silently produces a wrong number, not an error.**
-`score.py`'s impact formula looks up categorical CSV values (e.g.
-`data_classification`) in `config/weights.yaml`'s mapping tables via
-`dict.get(value, default)` — a value that doesn't exactly string-match a
-config key silently falls through to a generic default instead of raising.
-Not hypothetical: auditing every categorical column against every config
-map mid-project found that 18 of the 19 real `data_classification` labels
-in `assets.csv` (e.g. "Payment Card Data") had no match in the original
-5-entry map, silently understating impact for exactly the asset class —
-payment data — this system exists to protect. *Caught by* a full audit
-comparing every distinct CSV value against every config map, fixed, and
-verified against an independently-written recomputation of the same
-scores. *Not yet automated*: there's no standing Stage-1 check that would
-catch the next such drift on its own — a new CSV value added later without
-a matching config entry would silently repeat this exact bug.
+**A CSV value that doesn't exactly match a config key just quietly picks a
+default — no error, no warning.** The impact score looks up things like
+`data_classification` in `weights.yaml`'s mapping table, and a miss falls
+straight through to a generic default. I only caught this because I went
+and diffed every real value in the CSVs against every key in the config,
+and it turned out 18 of the 19 real `data_classification` labels (things
+like "Payment Card Data") didn't match anything in the original map. So
+every payment-data asset in the dataset was quietly getting scored as if
+it held generic internal data instead of the most sensitive tier there is
+— which is a genuinely bad thing for a *payments* risk tool to get wrong
+silently. I fixed the mapping, but there's still no automated check that
+would catch the next one of these. Add a new value to a CSV next month
+without updating the config, and it fails the exact same way, silently.
 
-**Layered exploitation evidence still has a residual blind spot.** The
-system doesn't rely on CISA KEV alone for "is this actively exploited"
-(KEV can never match this dataset's synthetic CVEs by construction) — it
-also checks the internal `threat_intelligence.csv` feed. But if a
-genuinely-exploited synthetic CVE has *neither* a KEV match *nor* a
-matching threat-intel record (the intel simply hasn't been collected yet),
-no signal remains, and the system scores it as "no known exploit" even
-though it's actively exploited in the scenario — the same failure the
-assignment's own example describes, one layer deeper. This is an accepted
-architectural limit, not something checked after the fact: the system can
-only reason from evidence it was actually given.
+**Our exploitation-evidence layering has a gap we can't fully close.** We
+don't just trust CISA KEV — it can never match this dataset's synthetic
+CVEs anyway — we also check the internal threat-intel feed. But if a
+synthetic CVE is genuinely being exploited and neither source has picked
+it up yet, there's nothing left to check against. The system will
+confidently say "no known exploit" and just be wrong. This isn't something
+I patched after finding it; it's a structural limit — the system can only
+know what it's actually been told, and I don't think there's a clean code
+fix for that, only better/more intel feeds.
 
-**The hallucination safety net can be fooled by text formatting, not just
-false facts.** `verify()` uses regex to confirm every cited control ID and
-CVE is real ground truth — only as reliable as the regex's formatting
-assumptions. Some models (confirmed: Groq's `openai/gpt-oss-120b`) write
-"typographically correct" Unicode hyphens inside control IDs themselves
-(`SC‑23.1` with U+2011, not ASCII `SC-23.1`) — the original regex read
-these as *zero* citations, rejecting perfectly valid, correctly-grounded
-drafts and needlessly falling back to the template. *Caught by* pulling
-the actual failing draft from LangSmith's trace history and comparing it
-byte-for-byte against what the regex expected, not guessing. *Residual
-risk*: this fixes one specific Unicode habit observed on one model — a
-different model could introduce a different formatting quirk the same
-kind of brittle regex would miss until the fallback rate visibly spikes.
+**The safety net that's supposed to catch hallucinated citations can be
+tricked by something as dumb as a hyphen.** When I switched the narrator
+model to Groq's `gpt-oss-120b`, every single card started failing
+verification and falling back to the boring template. Took a while to
+track down: that model likes writing "typographically correct" hyphens —
+the Unicode kind, not a plain keyboard one — inside the control-ID
+citations themselves, so it was writing `[SC‑23.1]` instead of
+`[SC-23.1]`. Our regex only recognized a literal ASCII hyphen, so it read
+every single citation as blank. The model wasn't hallucinating anything —
+our own checker just couldn't see what was right in front of it. Found it
+by pulling the actual rejected draft out of LangSmith and comparing it
+character by character against what the regex expected. Fixed it by
+normalizing hyphen variants before matching, but it's a narrow fix — a
+different model could trip the same kind of check with smart quotes or
+something else I haven't run into yet.
 
 ### 3. One thing I would change
 
-Retrieval-quality evaluation coverage. `run_stage4.py`'s retrieval eval
-checks exactly 5 hand-picked query→control pairs — the same 5 controls the
-assignment itself names as most relevant. That proves the mechanism works,
-but this dataset has 96 distinct vulnerability names, and the hand-written
-vocabulary map that routes ambiguous ones to the right NIST language only
-covers about 21 of them; the rest depend on the optional LLM-expansion
-fallback, which has never been measured against ground truth the way the
-5 hand-picked cases have. Since the assignment is explicit that this split
-— structured filtering vs. embedded retrieval, and how well the retrieval
-half actually works — is the primary thing being evaluated, that's where
-I'd spend the day: a real eval set (15-20 more hand-labeled
-vulnerability→expected-control pairs spanning types the hand-list misses),
-not further hardening the narration layer, which has already had a full
-session of real, evidence-backed bugs found and fixed against it.
+I'd build real retry/backoff around the LLM calls, because I watched this
+fail live. I ran the full 5-risk pipeline once and got a warning that 4 of
+5 cards had fallen back to the template — an 80% fallback rate, on a model
+and prompts I'd already confirmed work fine one at a time. Turned out
+Groq's free tier has a per-minute token limit, and this particular model
+burns a surprising number of hidden "reasoning" tokens on every call —
+enough that running all 5 risks back to back tripped the limit partway
+through, and since there was no retry logic, every call after that point
+just gave up immediately and fell back. I added a bounded retry
+specifically for rate-limit responses and reran the same pipeline — 5/5
+llm_grounded, no fallback. That part was easy once I saw it: a clearly
+labeled error, a `Retry-After` header, done. What I'd actually spend the
+extra day on is the broader version of this problem — right now a slow
+response, a network blip, or any other transient failure all get treated
+identically to "give up right now," when a real retry/backoff layer
+across every LLM call (not just the 429s) is what would actually make this
+robust enough to leave running unattended.
 
 ## What's genuinely production-ready here, and what isn't
 
