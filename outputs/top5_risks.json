@@ -1,0 +1,791 @@
+[
+  {
+    "affected_assets": [
+      {
+        "asset_id": "A-1021",
+        "asset_name": "load-balancer-prod-01",
+        "environment": "Production",
+        "business_service": "Customer Login",
+        "risk_score": 77.1,
+        "edr_missing": true
+      },
+      {
+        "asset_id": "A-1022",
+        "asset_name": "load-balancer-prod-02",
+        "environment": "Production",
+        "business_service": "Payment Processing",
+        "risk_score": 72.4,
+        "edr_missing": true
+      }
+    ],
+    "rank": 1,
+    "risk_score": 77.1,
+    "likelihood": 0.976,
+    "impact": 0.79,
+    "vuln_id": "V-2064",
+    "cve": "CVE-2023-4966",
+    "vulnerability_name": "Citrix ADC Session Token Leak (CitrixBleed)",
+    "cvss": 9.4,
+    "asset": {
+      "asset_id": "A-1021",
+      "asset_name": "load-balancer-prod-01",
+      "asset_type": "Load Balancer",
+      "environment": "Production",
+      "vendor_product": "Citrix NetScaler ADC 13.0",
+      "owner_team": "Network Team",
+      "internet_exposed": true,
+      "exposure_conflict": false,
+      "edr_missing": true
+    },
+    "business_service": {
+      "name": "Customer Login",
+      "revenue_impact": "Critical",
+      "customer_facing": "Yes",
+      "compliance_scope": "GDPR",
+      "rto_hours": 1,
+      "dependents": 3,
+      "business_impact": "Users cannot authenticate to the customer portal; all customer-facing transactions blocked"
+    },
+    "threat_context": {
+      "in_kev": true,
+      "kev_ransomware": true,
+      "kev_date_added": "2023-10-18",
+      "kev_required_action": "Apply mitigations and kill all active and persistent sessions per vendor instructions [https://www.netscaler.com/blog/news/cve-2023-4966-critical-security-update-now-available-for-netscaler-adc-and-netscaler-gateway/] OR discontinue use of the product if mitigations are unavailable.",
+      "ti_actors": "IronVeil",
+      "ti_campaigns": "CitrixBleed Exploitation",
+      "ti_maturity": "Active Exploitation",
+      "ti_last_seen": "2026-04-20",
+      "ransomware_linked": true,
+      "ti_summaries": "IronVeil group actively exploiting Citrix NetScaler CitrixBleed CVE-2023-4966 to harvest session tokens from load balancers protecting financial portals. Tokens used to bypass MFA.",
+      "mdr_excerpt": ""
+    },
+    "finding": {
+      "exploit_available": true,
+      "patch_available": true,
+      "days_open": 180,
+      "auth_required": false,
+      "affected_component": "NetScaler ADC"
+    },
+    "likelihood_breakdown": {
+      "exposure": {
+        "internet_exposed": true,
+        "value": 1.0
+      },
+      "evidence_tier": {
+        "tier": "active_and_ransomware",
+        "value": 1.0,
+        "in_kev": true,
+        "kev_ransomware": true,
+        "ti_actors": "IronVeil",
+        "ti_maturity": "Active Exploitation"
+      },
+      "cvss_multiplier": {
+        "cvss": 9.4,
+        "value": 0.976
+      },
+      "no_auth_required": {
+        "applied": true,
+        "value": 1.05
+      },
+      "profile_targeted": {
+        "applied": true,
+        "value": 1.1
+      },
+      "edr_missing": {
+        "applied": true,
+        "value": 1.2
+      }
+    },
+    "impact_breakdown": {
+      "components": {
+        "asset_criticality": {
+          "input": "High",
+          "score": 0.75,
+          "weight": 0.25
+        },
+        "service_revenue": {
+          "input": "Critical",
+          "score": 1.0,
+          "weight": 0.25
+        },
+        "compliance": {
+          "input": "GDPR",
+          "score": 0.8,
+          "weight": 0.2
+        },
+        "customer_facing": {
+          "input": "Yes",
+          "score": 1.0,
+          "weight": 0.1
+        },
+        "rto_urgency": {
+          "input": "1",
+          "score": 1.0,
+          "weight": 0.1
+        },
+        "data_classification": {
+          "input": "Internal Access",
+          "score": 0.4,
+          "weight": 0.1
+        }
+      },
+      "dependency_bonus": {
+        "dependents": 3,
+        "value": 0.15
+      },
+      "gateway_asset_bonus": {
+        "applied": false,
+        "asset_type": "Load Balancer",
+        "value": 0.0
+      },
+      "environment_modifier": {
+        "environment": "Production",
+        "value": 1.0
+      }
+    },
+    "related_findings_same_asset": [
+      {
+        "vuln_id": "V-2065",
+        "cve": "CVE-SYN-2025-0601",
+        "cvss": 6.8,
+        "risk_score": 18.8,
+        "same_campaign_chain": false
+      }
+    ]
+  },
+  {
+    "affected_assets": [
+      {
+        "asset_id": "A-1003",
+        "asset_name": "payment-api-prod-01",
+        "environment": "Production",
+        "business_service": "Payment Processing",
+        "risk_score": 67.5,
+        "edr_missing": false
+      }
+    ],
+    "rank": 2,
+    "risk_score": 67.5,
+    "likelihood": 0.803,
+    "impact": 0.84,
+    "vuln_id": "V-2009",
+    "cve": "CVE-SYN-2026-0010",
+    "vulnerability_name": "Payment API Insecure Direct Object Reference",
+    "cvss": 9.1,
+    "asset": {
+      "asset_id": "A-1003",
+      "asset_name": "payment-api-prod-01",
+      "asset_type": "API Server",
+      "environment": "Production",
+      "vendor_product": "Node.js 20 / Ubuntu 22.04",
+      "owner_team": "Payments Team",
+      "internet_exposed": true,
+      "exposure_conflict": false,
+      "edr_missing": false
+    },
+    "business_service": {
+      "name": "Payment Processing",
+      "revenue_impact": "Critical",
+      "customer_facing": "Yes",
+      "compliance_scope": "PCI DSS",
+      "rto_hours": 1,
+      "dependents": 1,
+      "business_impact": "Payments and fund transfers fail; PCI DSS breach obligations triggered"
+    },
+    "threat_context": {
+      "in_kev": false,
+      "kev_ransomware": false,
+      "kev_date_added": "",
+      "kev_required_action": "",
+      "ti_actors": "IronVeil",
+      "ti_campaigns": "CitrixBleed Exploitation",
+      "ti_maturity": "Active Exploitation",
+      "ti_last_seen": "2026-04-20",
+      "ransomware_linked": true,
+      "ti_summaries": "IronVeil also targeting payment API IDOR vulnerabilities in tandem with CitrixBleed to escalate access post-session-hijack.",
+      "mdr_excerpt": ""
+    },
+    "finding": {
+      "exploit_available": true,
+      "patch_available": true,
+      "days_open": 11,
+      "auth_required": false,
+      "affected_component": "Payment Handler"
+    },
+    "likelihood_breakdown": {
+      "exposure": {
+        "internet_exposed": true,
+        "value": 1.0
+      },
+      "evidence_tier": {
+        "tier": "active_and_ransomware",
+        "value": 1.0,
+        "in_kev": false,
+        "kev_ransomware": false,
+        "ti_actors": "IronVeil",
+        "ti_maturity": "Active Exploitation"
+      },
+      "cvss_multiplier": {
+        "cvss": 9.1,
+        "value": 0.964
+      },
+      "no_auth_required": {
+        "applied": true,
+        "value": 1.05
+      },
+      "profile_targeted": {
+        "applied": true,
+        "value": 1.1
+      },
+      "edr_missing": {
+        "applied": false,
+        "value": 1.0
+      }
+    },
+    "impact_breakdown": {
+      "components": {
+        "asset_criticality": {
+          "input": "Critical",
+          "score": 1.0,
+          "weight": 0.25
+        },
+        "service_revenue": {
+          "input": "Critical",
+          "score": 1.0,
+          "weight": 0.25
+        },
+        "compliance": {
+          "input": "PCI DSS",
+          "score": 1.0,
+          "weight": 0.2
+        },
+        "customer_facing": {
+          "input": "Yes",
+          "score": 1.0,
+          "weight": 0.1
+        },
+        "rto_urgency": {
+          "input": "1",
+          "score": 1.0,
+          "weight": 0.1
+        },
+        "data_classification": {
+          "input": "Payment Card Data",
+          "score": 1.0,
+          "weight": 0.1
+        }
+      },
+      "dependency_bonus": {
+        "dependents": 1,
+        "value": 0.05
+      },
+      "gateway_asset_bonus": {
+        "applied": false,
+        "asset_type": "API Server",
+        "value": 0.0
+      },
+      "environment_modifier": {
+        "environment": "Production",
+        "value": 1.0
+      }
+    },
+    "related_findings_same_asset": [
+      {
+        "vuln_id": "V-2010",
+        "cve": "CVE-2024-6387",
+        "cvss": 8.1,
+        "risk_score": 35.3,
+        "same_campaign_chain": false
+      },
+      {
+        "vuln_id": "V-2011",
+        "cve": "CVE-SYN-2025-0410",
+        "cvss": 6.5,
+        "risk_score": 16.4,
+        "same_campaign_chain": false
+      }
+    ]
+  },
+  {
+    "affected_assets": [
+      {
+        "asset_id": "A-1006",
+        "asset_name": "vpn-edge-02",
+        "environment": "Production",
+        "business_service": "Remote Access",
+        "risk_score": 63.3,
+        "edr_missing": true
+      },
+      {
+        "asset_id": "A-1005",
+        "asset_name": "vpn-edge-01",
+        "environment": "Production",
+        "business_service": "Remote Access",
+        "risk_score": 63.3,
+        "edr_missing": true
+      },
+      {
+        "asset_id": "A-1038",
+        "asset_name": "vpn-staging",
+        "environment": "Staging",
+        "business_service": "Remote Access",
+        "risk_score": 36.8,
+        "edr_missing": true
+      }
+    ],
+    "rank": 3,
+    "risk_score": 63.3,
+    "likelihood": 0.992,
+    "impact": 0.638,
+    "vuln_id": "V-2019",
+    "cve": "CVE-2024-21762",
+    "vulnerability_name": "Fortinet SSL-VPN Heap Buffer Overflow RCE",
+    "cvss": 9.8,
+    "asset": {
+      "asset_id": "A-1006",
+      "asset_name": "vpn-edge-02",
+      "asset_type": "VPN Gateway",
+      "environment": "Production",
+      "vendor_product": "Fortinet FortiGate 7.4.1",
+      "owner_team": "Network Team",
+      "internet_exposed": true,
+      "exposure_conflict": false,
+      "edr_missing": true
+    },
+    "business_service": {
+      "name": "Remote Access",
+      "revenue_impact": "High",
+      "customer_facing": "No",
+      "compliance_scope": "ISO 27001",
+      "rto_hours": 2,
+      "dependents": 0,
+      "business_impact": "Remote employees and administrators lose secure network access"
+    },
+    "threat_context": {
+      "in_kev": true,
+      "kev_ransomware": true,
+      "kev_date_added": "2024-02-09",
+      "kev_required_action": "Apply mitigations per vendor instructions or discontinue use of the product if mitigations are unavailable.",
+      "ti_actors": "CrimsonJackal",
+      "ti_campaigns": "Gateway Breaker",
+      "ti_maturity": "Weaponized",
+      "ti_last_seen": "2026-04-22",
+      "ransomware_linked": true,
+      "ti_summaries": "Active exploitation of Fortinet SSL-VPN CVE-2024-21762 observed against financial services and fintech firms in the Gulf region. Initial access leads to internal lateral movement and ransomware staging.",
+      "mdr_excerpt": ""
+    },
+    "finding": {
+      "exploit_available": true,
+      "patch_available": true,
+      "days_open": 27,
+      "auth_required": false,
+      "affected_component": "VPN Firmware"
+    },
+    "likelihood_breakdown": {
+      "exposure": {
+        "internet_exposed": true,
+        "value": 1.0
+      },
+      "evidence_tier": {
+        "tier": "active_and_ransomware",
+        "value": 1.0,
+        "in_kev": true,
+        "kev_ransomware": true,
+        "ti_actors": "CrimsonJackal",
+        "ti_maturity": "Weaponized"
+      },
+      "cvss_multiplier": {
+        "cvss": 9.8,
+        "value": 0.992
+      },
+      "no_auth_required": {
+        "applied": true,
+        "value": 1.05
+      },
+      "profile_targeted": {
+        "applied": true,
+        "value": 1.1
+      },
+      "edr_missing": {
+        "applied": true,
+        "value": 1.2
+      }
+    },
+    "impact_breakdown": {
+      "components": {
+        "asset_criticality": {
+          "input": "Critical",
+          "score": 1.0,
+          "weight": 0.25
+        },
+        "service_revenue": {
+          "input": "High",
+          "score": 0.75,
+          "weight": 0.25
+        },
+        "compliance": {
+          "input": "ISO 27001",
+          "score": 0.5,
+          "weight": 0.2
+        },
+        "customer_facing": {
+          "input": "No",
+          "score": 0.4,
+          "weight": 0.1
+        },
+        "rto_urgency": {
+          "input": "2",
+          "score": 0.8,
+          "weight": 0.1
+        },
+        "data_classification": {
+          "input": "Internal Access",
+          "score": 0.4,
+          "weight": 0.1
+        }
+      },
+      "dependency_bonus": {
+        "dependents": 0,
+        "value": 0.0
+      },
+      "gateway_asset_bonus": {
+        "applied": true,
+        "asset_type": "VPN Gateway",
+        "value": 0.1
+      },
+      "environment_modifier": {
+        "environment": "Production",
+        "value": 1.0
+      }
+    },
+    "related_findings_same_asset": [
+      {
+        "vuln_id": "V-2020",
+        "cve": "CVE-2024-55591",
+        "cvss": 9.8,
+        "risk_score": 63.3,
+        "same_campaign_chain": true
+      },
+      {
+        "vuln_id": "V-2021",
+        "cve": "CVE-SYN-2024-0188",
+        "cvss": 5.8,
+        "risk_score": 14.5,
+        "same_campaign_chain": false
+      }
+    ]
+  },
+  {
+    "affected_assets": [
+      {
+        "asset_id": "A-1001",
+        "asset_name": "auth-gateway-prod-01",
+        "environment": "Production",
+        "business_service": "Customer Login",
+        "risk_score": 61.8,
+        "edr_missing": false
+      }
+    ],
+    "rank": 4,
+    "risk_score": 61.8,
+    "likelihood": 0.703,
+    "impact": 0.88,
+    "vuln_id": "V-2001",
+    "cve": "CVE-SYN-2026-0001",
+    "vulnerability_name": "Remote Code Execution in Web Framework",
+    "cvss": 9.8,
+    "asset": {
+      "asset_id": "A-1001",
+      "asset_name": "auth-gateway-prod-01",
+      "asset_type": "Web Server",
+      "environment": "Production",
+      "vendor_product": "nginx 1.22 / Ubuntu 22.04",
+      "owner_team": "Identity Team",
+      "internet_exposed": true,
+      "exposure_conflict": false,
+      "edr_missing": false
+    },
+    "business_service": {
+      "name": "Customer Login",
+      "revenue_impact": "Critical",
+      "customer_facing": "Yes",
+      "compliance_scope": "GDPR",
+      "rto_hours": 1,
+      "dependents": 3,
+      "business_impact": "Users cannot authenticate to the customer portal; all customer-facing transactions blocked"
+    },
+    "threat_context": {
+      "in_kev": false,
+      "kev_ransomware": false,
+      "kev_date_added": "",
+      "kev_required_action": "",
+      "ti_actors": "ShadowMint",
+      "ti_campaigns": "Portal Crush",
+      "ti_maturity": "Weaponized",
+      "ti_last_seen": "2026-04-20",
+      "ransomware_linked": false,
+      "ti_summaries": "Campaign targets internet-facing customer portals running vulnerable web frameworks. CVE-SYN-2026-0001 observed in exploitation attempts across UAE-hosted portals.",
+      "mdr_excerpt": ""
+    },
+    "finding": {
+      "exploit_available": true,
+      "patch_available": true,
+      "days_open": 18,
+      "auth_required": false,
+      "affected_component": "Web Framework"
+    },
+    "likelihood_breakdown": {
+      "exposure": {
+        "internet_exposed": true,
+        "value": 1.0
+      },
+      "evidence_tier": {
+        "tier": "actively_exploited",
+        "value": 0.85,
+        "in_kev": false,
+        "kev_ransomware": false,
+        "ti_actors": "ShadowMint",
+        "ti_maturity": "Weaponized"
+      },
+      "cvss_multiplier": {
+        "cvss": 9.8,
+        "value": 0.992
+      },
+      "no_auth_required": {
+        "applied": true,
+        "value": 1.05
+      },
+      "profile_targeted": {
+        "applied": true,
+        "value": 1.1
+      },
+      "edr_missing": {
+        "applied": false,
+        "value": 1.0
+      }
+    },
+    "impact_breakdown": {
+      "components": {
+        "asset_criticality": {
+          "input": "Critical",
+          "score": 1.0,
+          "weight": 0.25
+        },
+        "service_revenue": {
+          "input": "Critical",
+          "score": 1.0,
+          "weight": 0.25
+        },
+        "compliance": {
+          "input": "GDPR",
+          "score": 0.8,
+          "weight": 0.2
+        },
+        "customer_facing": {
+          "input": "Yes",
+          "score": 1.0,
+          "weight": 0.1
+        },
+        "rto_urgency": {
+          "input": "1",
+          "score": 1.0,
+          "weight": 0.1
+        },
+        "data_classification": {
+          "input": "Customer PII",
+          "score": 0.9,
+          "weight": 0.1
+        }
+      },
+      "dependency_bonus": {
+        "dependents": 3,
+        "value": 0.15
+      },
+      "gateway_asset_bonus": {
+        "applied": false,
+        "asset_type": "Web Server",
+        "value": 0.0
+      },
+      "environment_modifier": {
+        "environment": "Production",
+        "value": 1.0
+      }
+    },
+    "related_findings_same_asset": [
+      {
+        "vuln_id": "V-2002",
+        "cve": "CVE-2024-6387",
+        "cvss": 8.1,
+        "risk_score": 37.0,
+        "same_campaign_chain": false
+      },
+      {
+        "vuln_id": "V-2003",
+        "cve": "CVE-SYN-2025-0182",
+        "cvss": 5.9,
+        "risk_score": 16.7,
+        "same_campaign_chain": false
+      },
+      {
+        "vuln_id": "V-2004",
+        "cve": "CVE-SYN-2024-0901",
+        "cvss": 3.7,
+        "risk_score": 15.0,
+        "same_campaign_chain": false
+      }
+    ]
+  },
+  {
+    "affected_assets": [
+      {
+        "asset_id": "A-1008",
+        "asset_name": "partner-api-gateway-prod",
+        "environment": "Production",
+        "business_service": "Partner API Gateway",
+        "risk_score": 59.5,
+        "edr_missing": false
+      }
+    ],
+    "rank": 5,
+    "risk_score": 59.5,
+    "likelihood": 0.81,
+    "impact": 0.734,
+    "vuln_id": "V-2024",
+    "cve": "CVE-SYN-2026-0011",
+    "vulnerability_name": "Kong Gateway Admin API Exposed",
+    "cvss": 9.3,
+    "asset": {
+      "asset_id": "A-1008",
+      "asset_name": "partner-api-gateway-prod",
+      "asset_type": "API Server",
+      "environment": "Production",
+      "vendor_product": "Kong Gateway 3.4 / Ubuntu 22.04",
+      "owner_team": "Partnerships Team",
+      "internet_exposed": true,
+      "exposure_conflict": false,
+      "edr_missing": false
+    },
+    "business_service": {
+      "name": "Partner API Gateway",
+      "revenue_impact": "High",
+      "customer_facing": "Yes",
+      "compliance_scope": "PCI DSS, ISO 27001",
+      "rto_hours": 2,
+      "dependents": 0,
+      "business_impact": "Bank and fintech partner integrations fail; SLA breach penalties apply"
+    },
+    "threat_context": {
+      "in_kev": false,
+      "kev_ransomware": false,
+      "kev_date_added": "",
+      "kev_required_action": "",
+      "ti_actors": "WinterViper",
+      "ti_campaigns": "Kong Gateway Exploit",
+      "ti_maturity": "Weaponized",
+      "ti_last_seen": "2026-04-24",
+      "ransomware_linked": true,
+      "ti_summaries": "WinterViper group targeting exposed API gateway admin interfaces, particularly Kong. Exploitation provides full control over all proxied routes, enabling traffic interception and partner impersonation.",
+      "mdr_excerpt": ""
+    },
+    "finding": {
+      "exploit_available": true,
+      "patch_available": true,
+      "days_open": 5,
+      "auth_required": false,
+      "affected_component": "API Admin Interface"
+    },
+    "likelihood_breakdown": {
+      "exposure": {
+        "internet_exposed": true,
+        "value": 1.0
+      },
+      "evidence_tier": {
+        "tier": "active_and_ransomware",
+        "value": 1.0,
+        "in_kev": false,
+        "kev_ransomware": false,
+        "ti_actors": "WinterViper",
+        "ti_maturity": "Weaponized"
+      },
+      "cvss_multiplier": {
+        "cvss": 9.3,
+        "value": 0.972
+      },
+      "no_auth_required": {
+        "applied": true,
+        "value": 1.05
+      },
+      "profile_targeted": {
+        "applied": true,
+        "value": 1.1
+      },
+      "edr_missing": {
+        "applied": false,
+        "value": 1.0
+      }
+    },
+    "impact_breakdown": {
+      "components": {
+        "asset_criticality": {
+          "input": "Critical",
+          "score": 1.0,
+          "weight": 0.25
+        },
+        "service_revenue": {
+          "input": "High",
+          "score": 0.75,
+          "weight": 0.25
+        },
+        "compliance": {
+          "input": "PCI DSS, ISO 27001",
+          "score": 1.0,
+          "weight": 0.2
+        },
+        "customer_facing": {
+          "input": "Yes",
+          "score": 1.0,
+          "weight": 0.1
+        },
+        "rto_urgency": {
+          "input": "2",
+          "score": 0.8,
+          "weight": 0.1
+        },
+        "data_classification": {
+          "input": "Payment Card Data",
+          "score": 1.0,
+          "weight": 0.1
+        }
+      },
+      "dependency_bonus": {
+        "dependents": 0,
+        "value": 0.0
+      },
+      "gateway_asset_bonus": {
+        "applied": false,
+        "asset_type": "API Server",
+        "value": 0.0
+      },
+      "environment_modifier": {
+        "environment": "Production",
+        "value": 1.0
+      }
+    },
+    "related_findings_same_asset": [
+      {
+        "vuln_id": "V-2025",
+        "cve": "CVE-2024-6387",
+        "cvss": 8.1,
+        "risk_score": 30.8,
+        "same_campaign_chain": false
+      },
+      {
+        "vuln_id": "V-2026",
+        "cve": "CVE-SYN-2025-0702",
+        "cvss": 7.7,
+        "risk_score": 14.4,
+        "same_campaign_chain": false
+      }
+    ]
+  }
+]

@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Cancel superseded runs on the same branch/PR instead of burning minutes on
+# a push that's already obsolete.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - run: pip install -r requirements-dev.txt
+      - run: ruff check .
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - run: pip install -r requirements.txt -r requirements-dev.txt
+      # Dense retrieval (chromadb + sentence-transformers) is exercised only
+      # via the BM25-only fixture in tests/conftest.py by design, so this
+      # suite needs no model download and no network access beyond the CISA
+      # KEV feed -- which itself degrades to the committed cached snapshot
+      # (data/external/kev_snapshot.json) if that's unreachable. See
+      # kev.py's fetch_kev() and its ALERT_WEBHOOK_URL-driven alert() on
+      # full fallback.
+      - run: pytest --cov=risk_engine --cov-report=term-missing --cov-report=xml
+        working-directory: .
+        env:
+          LOG_LEVEL: WARNING
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-py${{ matrix.python-version }}
+          path: coverage.xml
+
+  docker-build:
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      # Build-only: proves the image still builds on every change. Pushing to
+      # a registry is a separate, deliberate deploy step, not something CI
+      # does on every PR.
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          tags: cyber-risk-copilot:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

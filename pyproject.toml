@@ -1,0 +1,31 @@
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-ra --strict-markers"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+exclude = [".venv", "data", "outputs"]
+
+[tool.ruff.lint]
+# E/F: pyflakes+pycodestyle core. B: bugbear. BLE: flake8-blind-except -- the
+# codebase already carries `# noqa: BLE001` comments on deliberate broad
+# `except Exception` fallback handlers (kev.py, nist_catalog.py, retriever.py,
+# llm.py), so BLE needs to be enabled for those markers to mean anything.
+# I: import sorting.
+select = ["E", "F", "B", "BLE", "I"]
+ignore = [
+    "E501",  # line length is handled by formatting judgment, not a hard rule here
+    # This project has no installed package (src/ is put on sys.path manually,
+    # not `pip install -e .`), so App.py, every scripts/*.py entry point, and
+    # tests/conftest.py all deliberately do `sys.path.insert(...)` before their
+    # `from risk_engine...` imports. That's the actual, consistent convention
+    # here, not an oversight -- fixing it means turning this into an
+    # installable package, a bigger structural change than a lint config
+    # should force silently.
+    "E402",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["BLE"]  # tests intentionally use broad excepts in a couple of assertions

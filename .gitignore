@@ -1,0 +1,41 @@
+# --- secrets --------------------------------------------------------------
+.env
+.env.*
+!.env.example
+
+# --- Python ------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# --- virtual environments -----------------------------------------------
+.venv/
+venv/
+env/
+
+# --- IDE / editor ----------------------------------------------------------
+.idea/
+.vscode/
+
+# --- generated / runtime data ----------------------------------------------
+# data/chroma is a locally-built vector index (embeddings of the committed
+# data/external/nist_chunks.json) -- regenerated automatically on first run,
+# not source. See retriever.py / nist_catalog.py.
+data/chroma/
+
+# Per-run agent traces (LangSmith downloads via scripts/download_traces.py)
+# accumulate one timestamped file per run with no pruning -- not something
+# to keep in version control.
+outputs/traces/
+
+# Eval tooling's local cache dir.
+.deepeval/
+.deepeval_telemetry.txt
+
+# Docker build cache / local overrides, if ever used.
+.dockerignore.local

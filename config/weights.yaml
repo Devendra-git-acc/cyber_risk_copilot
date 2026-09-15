@@ -1,0 +1,123 @@
+# Scoring configuration — every weight in one place, deliberately config-driven.
+#
+# The factor ordering mirrors the prioritization guidance in the MDR threat
+# report's Analyst Notes: (1) internet exposure, (2) active exploitation,
+# (3) ransomware association, (4) business criticality & compliance,
+# (5) missing compensating controls. Weights are assumptions, not truths:
+# they are calibrated against known-good orderings (see scripts/run_stage3.py
+# sanity tests) and can be re-tuned without touching code.
+
+likelihood:
+  # (1) Reachability is the gate: an attacker cannot directly hit what they
+  # cannot reach. Internal findings keep a floor (insider/pivot risk) but can
+  # never outrank equivalent exposed findings — multiplicative by design.
+  base_exposure:
+    internet: 1.0
+    internal: 0.35
+
+  # (2) + (3) Layered exploitation evidence. Tier 1 requires BOTH active
+  # exploitation and ransomware linkage (from CISA KEV ransomware flag OR the
+  # internal threat-intel feed) — ransomware campaigns are the fastest path
+  # from foothold to business catastrophe.
+  evidence_tiers:
+    active_and_ransomware: 1.0
+    actively_exploited: 0.85     # KEV-listed OR TI maturity >= Commodity Exploit
+    poc_exploit_only: 0.60       # exploit_available=Yes but no campaign/KEV evidence
+    no_known_exploit: 0.30
+
+  # CVSS is deliberately dampened to a tiebreaker: 0.6 + 0.4*(cvss/10).
+  # Technical severity matters, but it never outvotes real-world evidence.
+  cvss_floor: 0.6
+  cvss_span: 0.4
+
+  # Multipliers (small, evidence-based nudges)
+  no_auth_required: 1.05         # unauthenticated exploitation = less friction
+  profile_targeted: 1.10         # campaign targets fintech / Middle East profile
+  edr_missing: 1.20              # (5) no detection/containment on the asset
+
+impact:
+  # Blend weights (sum to 1.0) — (4) business criticality & compliance.
+  blend:
+    asset_criticality: 0.25
+    service_revenue: 0.25
+    compliance: 0.20
+    customer_facing: 0.10
+    rto_urgency: 0.10
+    data_classification: 0.10
+
+  level_map:            # shared scale for criticality / revenue impact
+    Critical: 1.0
+    High: 0.75
+    Medium: 0.5
+    Low: 0.25
+
+  compliance_map:       # regulatory amplification; max across scopes
+    "PCI DSS": 1.0
+    "GDPR": 0.8
+    "UAE PDPL": 0.8
+    "ISO 27001": 0.5
+    "SOC 2": 0.5
+    "IFRS": 0.3
+  compliance_default: 0.2
+
+  customer_facing: { "Yes": 1.0, "No": 0.4 }
+
+  rto_bands:            # hours -> urgency (lower RTO = less tolerance for outage)
+    - [1, 1.0]
+    - [4, 0.8]
+    - [12, 0.6]
+    - [24, 0.4]
+    - [9999, 0.2]
+
+  # Audited against the actual assets.csv values (2026-09) — a "Financial
+  # Reports"-style hand-written list previously covered only 1/19 real
+  # labels ("Customer PII"); everything else silently fell through to
+  # data_classification_default, understating impact for e.g. "Payment Card
+  # Data" and "Secrets". Keep both the original labels (compatibility with
+  # any other dataset using them) and every label actually seen in this one.
+  data_classification_map:
+    "Payment Data": 1.0
+    "Payment Card Data": 1.0
+    "Secrets": 1.0
+    "Customer PII": 0.9
+    "Transaction Data": 0.9
+    "Employee PII": 0.8
+    "Executive Confidential": 0.8
+    "Security Data": 0.8
+    "Financial Reports": 0.7
+    "Financial Data": 0.7
+    "Regulatory Data": 0.7
+    "Source Code": 0.6
+    "Internal Confidential": 0.5
+    "Internal": 0.4
+    "Internal Access": 0.4
+    "Aggregated Analytics": 0.3
+    "Log Data": 0.3
+    "Staging Access": 0.3
+    "Public": 0.2
+    "Public Data": 0.2
+    "Synthetic Dev Data": 0.2
+    "Synthetic Test Data": 0.2
+    "Test Data": 0.2
+  data_classification_default: 0.4
+
+  # Cascade: services that other services depend on carry extra impact.
+  dependency_bonus_per_dependent: 0.05
+  dependency_bonus_cap: 0.15
+
+  # Gateway assets (network perimeter access devices): compromise grants
+  # network-wide access, so impact exceeds the owning service's revenue
+  # profile. The MDR report's lead campaign (CrimsonJackal) targets exactly
+  # this class. Deliberately NOT applied to load balancers — their impact is
+  # already captured by the services they front.
+  gateway_asset_types: ["VPN Gateway", "Firewall"]
+  gateway_asset_bonus: 0.10
+
+  environment_modifier:
+    Production: 1.0
+    Staging: 0.7
+    Development: 0.5
+
+ranking:
+  top_n: 5
+  one_risk_per_asset: true   # a CISO briefing needs five distinct fires

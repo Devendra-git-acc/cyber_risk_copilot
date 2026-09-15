@@ -1,0 +1,8 @@
+# Optional -- only needed for scripts/eval_faithfulness_deepeval.py (Tier 2 eval).
+# NOT required to run the app or the rest of the pipeline; kept separate so the
+# deployed app's install stays lean. Install with:
+#   pip install -r requirements.txt -r requirements-eval.txt
+#
+# DeepEval, not RAGAS -- see requirements.txt for why. This file was referenced
+# from requirements.txt but missing from the repo; recreated to match.
+deepeval>=4.0

@@ -1,0 +1,33 @@
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	build_query(build_query)
+	retrieve(retrieve)
+	grade(grade)
+	count_rewrite(count_rewrite)
+	generate(generate)
+	verify(verify)
+	count_regen(count_regen)
+	fallback(fallback)
+	finalize(finalize)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> build_query;
+	build_query --> retrieve;
+	count_regen --> generate;
+	count_rewrite --> build_query;
+	fallback --> finalize;
+	generate --> verify;
+	grade -. &nbsp;rewrite&nbsp; .-> count_rewrite;
+	grade -.-> generate;
+	retrieve --> grade;
+	verify -. &nbsp;regenerate&nbsp; .-> count_regen;
+	verify -.-> fallback;
+	verify -.-> finalize;
+	finalize --> __end__;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc

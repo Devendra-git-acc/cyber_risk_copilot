@@ -1,0 +1,15 @@
+pandas>=2.0
+pyyaml>=6.0
+requests>=2.31
+rank_bm25>=0.2.2
+langchain_text_splitters>=0.3
+langgraph>=0.2
+chromadb>=0.5
+sentence-transformers>=3.0
+streamlit>=1.36
+
+# Tier-2 eval (scripts/eval_faithfulness_deepeval.py) deliberately lives in
+# requirements-eval.txt, NOT here -- so `pip install -r requirements.txt`
+# alone (the app/pipeline install) stays lean. See requirements-eval.txt
+# for why DeepEval over RAGAS. (Previously duplicated here too, which
+# defeated the point of splitting it out -- removed.)

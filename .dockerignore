@@ -1,0 +1,13 @@
+.venv/
+.git/
+.idea/
+.deepeval/
+__pycache__/
+*.pyc
+.env
+.env.*
+outputs/
+data/chroma/
+tests/
+.github/
+*.md

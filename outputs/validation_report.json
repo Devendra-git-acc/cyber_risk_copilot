@@ -1,0 +1,166 @@
+{
+  "checks": [
+    {
+      "check": "every vulnerability maps to a real asset",
+      "passed": true,
+      "detail": "all asset_ids resolve"
+    },
+    {
+      "check": "every asset's business_service exists",
+      "passed": true,
+      "detail": "all services resolve"
+    },
+    {
+      "check": "vuln_id unique",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "asset_id unique",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "CVSS within [0, 10]",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "days_open non-negative",
+      "passed": true,
+      "detail": ""
+    }
+  ],
+  "issues": [
+    {
+      "kind": "exposure_conflict",
+      "severity": "high",
+      "detail": "vuln-level asset_exposure disagrees with asset-level internet_exposed; policy: treat as internet-exposed (worst case) and flag",
+      "items": [
+        {
+          "vuln_id": "V-2014",
+          "asset_id": "A-1004",
+          "asset_name": "payment-api-prod-02",
+          "asset_exposure": "Internal",
+          "internet_exposed": "Yes"
+        }
+      ]
+    },
+    {
+      "kind": "synthetic_cves",
+      "severity": "info",
+      "detail": "74/114 findings use synthetic CVE ids that can never match external feeds (CISA KEV); exploitation evidence must be layered (KEV for real CVEs, internal threat intel + exploit_available for synthetic).",
+      "items": []
+    },
+    {
+      "kind": "threat_intel_noise",
+      "severity": "info",
+      "detail": "16/40 intel records reference CVEs/controls not present in the environment; they are excluded from scoring as industry noise.",
+      "items": []
+    },
+    {
+      "kind": "edr_gaps",
+      "severity": "medium",
+      "detail": "26/60 assets lack EDR \u2014 scored as missing compensating control.",
+      "items": []
+    },
+    {
+      "kind": "stale_assets",
+      "severity": "medium",
+      "detail": "assets unseen >30 days (possibly unmanaged)",
+      "items": [
+        {
+          "asset_id": "A-1034",
+          "asset_name": "legacy-payments-db",
+          "last_seen_days": 45
+        },
+        {
+          "asset_id": "A-1059",
+          "asset_name": "legacy-reporting-server",
+          "last_seen_days": 62
+        },
+        {
+          "asset_id": "A-1060",
+          "asset_name": "dr-failover-site",
+          "last_seen_days": 38
+        }
+      ]
+    },
+    {
+      "kind": "ownerless_assets",
+      "severity": "low",
+      "detail": "assets with no owning team (remediation has no owner)",
+      "items": [
+        {
+          "asset_id": "A-1059",
+          "asset_name": "legacy-reporting-server"
+        }
+      ]
+    }
+  ],
+  "row_counts": {
+    "assets": 60,
+    "vulnerabilities": 114,
+    "threat_intel": 40,
+    "business_services": 20,
+    "remediation_hints": 30
+  },
+  "cve_profile": {
+    "synthetic": 74,
+    "real": 40,
+    "unique_real": 20
+  },
+  "threat_intel_profile": {
+    "matched_to_environment": 24,
+    "noise": 16,
+    "noise_intel_ids": [
+      "TI-3012",
+      "TI-3026",
+      "TI-3027",
+      "TI-3028",
+      "TI-3029",
+      "TI-3030",
+      "TI-3031",
+      "TI-3032",
+      "TI-3033",
+      "TI-3034",
+      "TI-3035",
+      "TI-3036",
+      "TI-3037",
+      "TI-3038",
+      "TI-3039",
+      "TI-3040"
+    ]
+  },
+  "asset_hygiene": {
+    "edr_missing": 26,
+    "stale_over_30d": [
+      {
+        "asset_id": "A-1034",
+        "asset_name": "legacy-payments-db",
+        "last_seen_days": 45
+      },
+      {
+        "asset_id": "A-1059",
+        "asset_name": "legacy-reporting-server",
+        "last_seen_days": 62
+      },
+      {
+        "asset_id": "A-1060",
+        "asset_name": "dr-failover-site",
+        "last_seen_days": 38
+      }
+    ],
+    "ownerless": [
+      {
+        "asset_id": "A-1059",
+        "asset_name": "legacy-reporting-server"
+      }
+    ]
+  },
+  "summary": {
+    "checks_passed": 6,
+    "checks_total": 6,
+    "issues_found": 6
+  }
+}
