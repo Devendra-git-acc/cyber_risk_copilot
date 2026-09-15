@@ -44,3 +44,7 @@ outputs/traces/
 # never meant for version control (one seen was 9.4MB and included the
 # gitignored data/chroma/ vector index inside it).
 *.zip
+
+# Personal interview-prep notes -- useful to keep locally, not meant to be
+# public in the submitted repo.
+INTERVIEW_PREP.md
