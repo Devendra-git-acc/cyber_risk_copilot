@@ -255,6 +255,83 @@ compensating controls). Runtime config is environment variables — see
 [`.env.example`](.env.example) for the full list (LLM provider/key/model,
 LangSmith tracing, eval judge model, logging, alerting).
 
+## Supporting questions
+
+### 1. The data split
+
+What did you embed and why? Only the NIST SP 800-53 control catalog
+(~1,237 chunks) — it's genuinely unstructured prose where a vulnerability's
+own wording and a control's wording rarely match exactly, so bridging that
+gap needs semantic similarity, not exact matching.
+
+What did you query as structured records and why? All five CSVs (assets,
+vulnerabilities, threat intel, business services, remediation hints) — this
+data is relational ("which vulnerabilities sit on internet-exposed assets"
+is a join and a boolean filter, not a similarity search), and embedding it
+would trade deterministic, auditable correctness for approximate retrieval
+on data that never needed it.
+
+### 2. Where it goes wrong
+
+**Config/data drift silently produces a wrong number, not an error.**
+`score.py`'s impact formula looks up categorical CSV values (e.g.
+`data_classification`) in `config/weights.yaml`'s mapping tables via
+`dict.get(value, default)` — a value that doesn't exactly string-match a
+config key silently falls through to a generic default instead of raising.
+Not hypothetical: auditing every categorical column against every config
+map mid-project found that 18 of the 19 real `data_classification` labels
+in `assets.csv` (e.g. "Payment Card Data") had no match in the original
+5-entry map, silently understating impact for exactly the asset class —
+payment data — this system exists to protect. *Caught by* a full audit
+comparing every distinct CSV value against every config map, fixed, and
+verified against an independently-written recomputation of the same
+scores. *Not yet automated*: there's no standing Stage-1 check that would
+catch the next such drift on its own — a new CSV value added later without
+a matching config entry would silently repeat this exact bug.
+
+**Layered exploitation evidence still has a residual blind spot.** The
+system doesn't rely on CISA KEV alone for "is this actively exploited"
+(KEV can never match this dataset's synthetic CVEs by construction) — it
+also checks the internal `threat_intelligence.csv` feed. But if a
+genuinely-exploited synthetic CVE has *neither* a KEV match *nor* a
+matching threat-intel record (the intel simply hasn't been collected yet),
+no signal remains, and the system scores it as "no known exploit" even
+though it's actively exploited in the scenario — the same failure the
+assignment's own example describes, one layer deeper. This is an accepted
+architectural limit, not something checked after the fact: the system can
+only reason from evidence it was actually given.
+
+**The hallucination safety net can be fooled by text formatting, not just
+false facts.** `verify()` uses regex to confirm every cited control ID and
+CVE is real ground truth — only as reliable as the regex's formatting
+assumptions. Some models (confirmed: Groq's `openai/gpt-oss-120b`) write
+"typographically correct" Unicode hyphens inside control IDs themselves
+(`SC‑23.1` with U+2011, not ASCII `SC-23.1`) — the original regex read
+these as *zero* citations, rejecting perfectly valid, correctly-grounded
+drafts and needlessly falling back to the template. *Caught by* pulling
+the actual failing draft from LangSmith's trace history and comparing it
+byte-for-byte against what the regex expected, not guessing. *Residual
+risk*: this fixes one specific Unicode habit observed on one model — a
+different model could introduce a different formatting quirk the same
+kind of brittle regex would miss until the fallback rate visibly spikes.
+
+### 3. One thing I would change
+
+Retrieval-quality evaluation coverage. `run_stage4.py`'s retrieval eval
+checks exactly 5 hand-picked query→control pairs — the same 5 controls the
+assignment itself names as most relevant. That proves the mechanism works,
+but this dataset has 96 distinct vulnerability names, and the hand-written
+vocabulary map that routes ambiguous ones to the right NIST language only
+covers about 21 of them; the rest depend on the optional LLM-expansion
+fallback, which has never been measured against ground truth the way the
+5 hand-picked cases have. Since the assignment is explicit that this split
+— structured filtering vs. embedded retrieval, and how well the retrieval
+half actually works — is the primary thing being evaluated, that's where
+I'd spend the day: a real eval set (15-20 more hand-labeled
+vulnerability→expected-control pairs spanning types the hand-list misses),
+not further hardening the narration layer, which has already had a full
+session of real, evidence-backed bugs found and fixed against it.
+
 ## What's genuinely production-ready here, and what isn't
 
 The pipeline logic (Stages 1-5) is built to real engineering standards:
