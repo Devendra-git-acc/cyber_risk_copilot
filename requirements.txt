@@ -6,6 +6,12 @@ langchain_text_splitters>=0.3
 langgraph>=0.2
 chromadb>=0.5
 
+# Explicit, not relying on chromadb's transitive pull (via pydantic-settings)
+# -- src/risk_engine/llm.py imports this directly (`from dotenv import
+# load_dotenv`), so it needs to be a first-class dependency of this project,
+# not an accident of what another package happens to need today.
+python-dotenv>=1.0
+
 # CPU-only torch, explicitly. sentence-transformers pulls in torch
 # transitively, and without this, pip resolves the default PyPI build on
 # Linux -- which is CUDA-enabled and drags in the full nvidia-cuda-*/
